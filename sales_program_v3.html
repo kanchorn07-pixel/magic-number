@@ -183,7 +183,7 @@ tbody tr:hover td{background:rgba(0,0,0,.02)}
 ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
 
 /* ── LOGIN MODAL ─────────────────────────────────────────── */
-#login-overlay{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center}
+#login-overlay{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center}
 #login-box{background:var(--surface,#1a1814);border:1px solid var(--border,#3a3530);border-radius:16px;padding:36px 40px;width:100%;max-width:380px;box-shadow:0 24px 60px rgba(0,0,0,.5)}
 #login-logo{text-align:center;font-size:2rem;margin-bottom:4px}
 #login-title{text-align:center;font-size:1.1rem;font-weight:700;color:var(--text,#f5f0e8);margin-bottom:4px}
@@ -1061,8 +1061,10 @@ const ALLOWED_ROLES_SALES = ['admin','seller']; // ผู้ขายและ a
 async function checkLogin(){
   const sess = sessionStorage.getItem('mn_session');
   if(sess){
-    const u = JSON.parse(sess);
-    if(ALLOWED_ROLES_SALES.includes(u.role)){ applySession(u); return; }
+    try{
+      const u = JSON.parse(sess);
+      if(ALLOWED_ROLES_SALES.includes(u.role)){ applySession(u); return; }
+    }catch(e){}
     sessionStorage.removeItem('mn_session');
   }
   document.getElementById('login-overlay').style.display='flex';
