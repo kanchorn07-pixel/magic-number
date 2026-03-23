@@ -881,7 +881,7 @@ async function fetchFromFirebase() {
 
 function loadSales() {
   // return current allSales (will be replaced after async fetch)
-  return allSales.length ? allSales : generateDemoData();
+  return (typeof allSales !== 'undefined' && allSales.length) ? allSales : [];
 }
 
 function generateDemoData() {
@@ -928,7 +928,7 @@ function generateDemoData() {
   return data.reverse();
 }
 
-let allSales = loadSales();
+let allSales = [];
 
 // ============================================================
 // DATE UTILS
