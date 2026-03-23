@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>จัดการผู้ใช้งาน — Magic Number</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Sarabun',sans-serif;background:#0d1117;color:#e2e8f4;min-height:100vh;padding:24px}
+h1{font-size:1.3rem;font-weight:700;margin-bottom:4px}
+.sub{color:#8b949e;font-size:.82rem;margin-bottom:24px}
+.card{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:20px 24px;margin-bottom:16px}
+.card h2{font-size:.95rem;font-weight:700;margin-bottom:16px;color:#58a6ff}
+.grid{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:10px;align-items:end;margin-bottom:12px}
+label{font-size:.7rem;color:#8b949e;text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:5px}
+input,select{width:100%;background:#21262d;border:1px solid #30363d;border-radius:6px;padding:9px 12px;color:#e2e8f4;font-family:inherit;font-size:.88rem}
+input:focus,select:focus{outline:none;border-color:#58a6ff}
+.btn{border:none;border-radius:7px;padding:10px 18px;font-family:inherit;font-size:.88rem;font-weight:700;cursor:pointer;transition:opacity .15s;white-space:nowrap}
+.btn-add{background:#238636;color:#fff}.btn-add:hover{opacity:.85}
+.btn-del{background:#da3633;color:#fff;padding:9px 14px}.btn-del:hover{opacity:.85}
+.btn-save{background:#1f6feb;color:#fff;width:100%;padding:12px;font-size:.95rem;margin-top:8px}.btn-save:hover{opacity:.85}
+.btn-load{background:#21262d;border:1px solid #30363d;color:#8b949e;margin-bottom:12px}.btn-load:hover{color:#e2e8f4}
+table{width:100%;border-collapse:collapse;font-size:.82rem}
+th{background:#21262d;padding:9px 12px;text-align:left;font-size:.7rem;text-transform:uppercase;letter-spacing:.8px;color:#8b949e}
+td{padding:9px 12px;border-bottom:1px solid #21262d}
+.role-badge{display:inline-block;padding:2px 10px;border-radius:12px;font-size:.72rem;font-weight:700}
+.role-admin{background:rgba(245,158,11,.15);color:#f59e0b}
+.role-seller{background:rgba(59,130,246,.15);color:#58a6ff}
+.role-manager{background:rgba(139,92,246,.15);color:#a78bfa}
+.log{background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:12px;font-family:monospace;font-size:.78rem;line-height:2;max-height:180px;overflow-y:auto;margin-top:12px;display:none}
+.ok{color:#3fb950}.err{color:#f85149}.info{color:#58a6ff}
+</style>
+</head>
+<body>
+<h1>👥 จัดการผู้ใช้งาน — Magic Number</h1>
+<div class="sub">เพิ่ม / แก้ไข / ลบผู้ใช้งาน บันทึกไปยัง Firebase</div>
+
+<!-- ROLE INFO -->
+<div class="card">
+  <h2>🔐 ระดับสิทธิ์</h2>
+  <table>
+    <tr><th>Role</th><th>เข้าระบบขาย</th><th>เข้า Dashboard</th></tr>
+    <tr><td><span class="role-badge role-admin">admin</span></td><td>✅</td><td>✅</td></tr>
+    <tr><td><span class="role-badge role-seller">seller</span></td><td>✅</td><td>❌</td></tr>
+    <tr><td><span class="role-badge role-manager">manager</span></td><td>❌</td><td>✅</td></tr>
+  </table>
+</div>
+
+<!-- ADD USER -->
+<div class="card">
+  <h2>➕ เพิ่ม / แก้ไข ผู้ใช้งาน</h2>
+  <div class="grid">
+    <div><label>Username</label><input type="text" id="u-username" placeholder="เช่น admin1" autocomplete="off"></div>
+    <div><label>ชื่อแสดง</label><input type="text" id="u-name" placeholder="เช่น สมชาย" autocomplete="off"></div>
+    <div><label>รหัสผ่าน</label><input type="password" id="u-pass" placeholder="รหัสผ่าน"></div>
+    <div>
+      <label>Role</label>
+      <select id="u-role">
+        <option value="admin">admin</option>
+        <option value="seller" selected>seller</option>
+        <option value="manager">manager</option>
+      </select>
+    </div>
+  </div>
+  <button class="btn btn-add" onclick="addUser()">💾 บันทึกผู้ใช้นี้</button>
+</div>
+
+<!-- USER LIST -->
+<div class="card">
+  <h2>📋 รายชื่อผู้ใช้ทั้งหมด</h2>
+  <button class="btn btn-load" onclick="loadUsers()">🔄 โหลดจาก Firebase</button>
+  <table id="user-table">
+    <thead><tr><th>Username</th><th>ชื่อแสดง</th><th>Role</th><th>จัดการ</th></tr></thead>
+    <tbody id="user-body"><tr><td colspan="4" style="color:#8b949e;text-align:center">กด "โหลดจาก Firebase" เพื่อดูรายชื่อ</td></tr></tbody>
+  </table>
+</div>
+
+<div class="log" id="log"></div>
+
+<script>
+const FB_URL = 'https://magic-number-7b488-default-rtdb.asia-southeast1.firebasedatabase.app';
+
+function log(msg, cls='info'){
+  const el = document.getElementById('log');
+  el.style.display = 'block';
+  el.innerHTML += `<span class="${cls}">${msg}</span>\n`;
+  el.scrollTop = el.scrollHeight;
+}
+
+async function addUser(){
+  const username = document.getElementById('u-username').value.trim().toLowerCase();
+  const name     = document.getElementById('u-name').value.trim();
+  const password = document.getElementById('u-pass').value;
+  const role     = document.getElementById('u-role').value;
+  if(!username || !password){ log('❌ กรุณากรอก username และรหัสผ่าน','err'); return; }
+  if(username.includes(' ')){ log('❌ Username ต้องไม่มีช่องว่าง','err'); return; }
+  try{
+    const res = await fetch(`${FB_URL}/users/${username}.json`,{
+      method:'PUT',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({name: name||username, password, role})
+    });
+    if(res.ok){
+      log(`✅ บันทึกผู้ใช้ "${username}" (${role}) สำเร็จ`,'ok');
+      document.getElementById('u-username').value='';
+      document.getElementById('u-name').value='';
+      document.getElementById('u-pass').value='';
+      loadUsers();
+    } else { log('❌ Firebase error: '+res.status,'err'); }
+  } catch(e){ log('❌ '+e.message,'err'); }
+}
+
+async function loadUsers(){
+  log('🔄 กำลังโหลด...','info');
+  try{
+    const res = await fetch(`${FB_URL}/users.json`);
+    const data = await res.json();
+    const tbody = document.getElementById('user-body');
+    if(!data){ tbody.innerHTML='<tr><td colspan="4" style="color:#8b949e;text-align:center">ยังไม่มีผู้ใช้</td></tr>'; return; }
+    tbody.innerHTML = Object.entries(data).map(([uname, u]) => `
+      <tr>
+        <td style="font-family:monospace">${uname}</td>
+        <td>${u.name||'-'}</td>
+        <td><span class="role-badge role-${u.role}">${u.role}</span></td>
+        <td>
+          <button class="btn btn-del" onclick="delUser('${uname}')">🗑️</button>
+        </td>
+      </tr>`).join('');
+    log(`✅ โหลดสำเร็จ ${Object.keys(data).length} คน`,'ok');
+  } catch(e){ log('❌ '+e.message,'err'); }
+}
+
+async function delUser(username){
+  if(!confirm(`ยืนยันลบผู้ใช้ "${username}"?`)) return;
+  try{
+    await fetch(`${FB_URL}/users/${username}.json`,{method:'DELETE'});
+    log(`🗑️ ลบ "${username}" แล้ว`,'ok');
+    loadUsers();
+  } catch(e){ log('❌ '+e.message,'err'); }
+}
+
+// Auto-load on open
+loadUsers();
+</script>
+</body>
+</html>

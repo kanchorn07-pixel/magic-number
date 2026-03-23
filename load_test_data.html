@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>โหลดข้อมูลทดสอบ → Firebase</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Sarabun',sans-serif;background:#0d1117;color:#e2e8f4;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.box{background:#161b22;border:1px solid #30363d;border-radius:14px;padding:32px 36px;max-width:580px;width:100%}
+h1{font-size:1.25rem;font-weight:700;margin-bottom:4px;text-align:center}
+.sub{color:#8b949e;font-size:.8rem;text-align:center;margin-bottom:20px;line-height:1.8}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.kcard{background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:10px 13px}
+.kl{font-size:.62rem;color:#8b949e;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px}
+.kv{font-family:'JetBrains Mono',monospace;font-size:.88rem;color:#58a6ff;font-weight:600}
+.btn{width:100%;border:none;border-radius:8px;padding:12px;font-family:'Sarabun',sans-serif;font-size:.92rem;font-weight:700;cursor:pointer;transition:all .2s;margin-bottom:8px}
+.btn-go{background:#238636;color:#fff}.btn-go:hover{background:#2ea043}.btn-go:disabled{background:#21262d;color:#484f58;cursor:not-allowed}
+.btn-clr{background:#21262d;color:#8b949e;border:1px solid #30363d}.btn-clr:hover{color:#e2e8f4}
+.log{background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:13px;font-family:'JetBrains Mono',monospace;font-size:.76rem;line-height:2.1;max-height:300px;overflow-y:auto;display:none;margin-top:4px;white-space:pre-wrap}
+.ok{color:#3fb950}.warn{color:#f0883e}.hi{color:#58a6ff}.gold{color:#e3b341}
+</style>
+</head>
+<body>
+<div class="box">
+  <h1>🧪 โหลดข้อมูลทดสอบ</h1>
+  <div class="sub">10 ลูกค้า · 100 บิล · สินค้าทุกแบบ 2/3 หลัก · ส่งตรง Firebase</div>
+
+  <div class="grid2">
+    <div class="kcard"><div class="kl">บิล</div><div class="kv">100 บิล</div></div>
+    <div class="kcard"><div class="kl">ลูกค้า</div><div class="kv">10 คน (ครบทุกคน)</div></div>
+    <div class="kcard"><div class="kl">ราคาต่อชิ้น</div><div class="kv">50–1,000 ฿</div></div>
+    <div class="kcard"><div class="kl">ช่วงเวลา</div><div class="kv">30 วันล่าสุด</div></div>
+  </div>
+
+  <button class="btn btn-go" id="btn-load" onclick="doLoad()">✅ โหลด 100 บิล → Firebase</button>
+  <button class="btn btn-clr" onclick="doClear()">🗑️ ล้างข้อมูลใน Firebase</button>
+  <div class="log" id="log"></div>
+</div>
+
+<script>
+const FB_URL = 'https://magic-number-7b488-default-rtdb.asia-southeast1.firebasedatabase.app';
+
+const PRICES    = [50,100,200,300,400,500,1000];
+const CUSTOMERS = ['สมชาย','สมหญิง','อนุชา','กนกวรรณ','ธนพล','วิไลวรรณ','ประสิทธิ์','มาลี','สุรชัย','พิมพ์ใจ'];
+const CODES2    = ['11','23','45','56','67','74','82','99','31','48'];
+const CODES3    = ['101','234','345','456','502','654','789','825','312','971'];
+
+// แบบย่อย 2 หลัก
+const VARS2 = ['O','U','OU','B'];
+// แบบย่อย 3 หลัก (ครบทุกแบบ)
+const VARS3_NORMAL = ['D','R','DR','Z','6D','3DU','3DF']; // สำหรับเลขไม่ซ้ำ
+const VARS3_DUP    = ['D','R','DR','Z','6D','3DU','3DF','3LN','3LB']; // สำหรับเลขซ้ำ
+
+function pick(a){ return a[Math.floor(Math.random()*a.length)]; }
+function rnd(a,b){ return a+Math.floor(Math.random()*(b-a+1)); }
+
+function hasDup(code){
+  const s=code.padStart(3,'0');
+  return s[0]===s[1]||s[1]===s[2]||s[0]===s[2];
+}
+
+function reverseCode2(code){
+  const s=code.padStart(2,'0');
+  return s[1]+s[0];
+}
+
+function isPalin(code){
+  const s=code.padStart(2,'0');
+  return s[0]===s[1];
+}
+
+// คำนวณราคาจริงตาม variant
+function calcPrice(price, variant){
+  if(variant==='Z'||variant==='3LB') return price*3;
+  if(variant==='6D') return price*6;
+  if(variant==='3LN') return price*2;
+  return price;
+}
+
+function buildSales(){
+  const shuffled=[...CUSTOMERS].sort(()=>Math.random()-.5);
+  const sales=[];
+
+  for(let b=0;b<100;b++){
+    const dAgo=rnd(0,29);
+    const dt=new Date();
+    dt.setDate(dt.getDate()-dAgo);
+    dt.setHours(rnd(8,20),rnd(0,59),rnd(0,59));
+    const dateObj=new Date(dt.getFullYear(),dt.getMonth(),dt.getDate());
+
+    const customer = b<10 ? shuffled[b] : pick(CUSTOMERS);
+    const payType  = Math.random()<0.7?'cash':'credit';
+    const billNo   = 'INV-'+String(b+1).padStart(4,'0');
+    const numItems = rnd(2,5);
+    const items=[], used=new Set();
+
+    for(let i=0;i<numItems;i++){
+      let code, variant, mk, tries=0;
+      do{
+        const use3 = Math.random()<0.45;
+        if(use3){
+          code = pick(CODES3);
+          const isDup = hasDup(code);
+          // กรองแบบย่อยที่เหมาะสม
+          let varPool = isDup ? VARS3_DUP : VARS3_NORMAL;
+          variant = pick(varPool);
+        } else {
+          code = pick(CODES2);
+          // ถ้าเลขเบิ้ล ห้าม B
+          let varPool = isPalin(code) ? ['O','U','OU'] : VARS2;
+          variant = pick(varPool);
+        }
+        mk = code+'-'+variant;
+        tries++;
+      } while(used.has(mk) && tries<30);
+      used.add(mk);
+
+      const basePrice = pick(PRICES);
+      const qty       = rnd(1,3);
+
+      // จัดการ combo (OU, DR)
+      if(variant==='OU'){
+        // บันทึก O และ U แยก
+        ['O','U'].forEach(sv=>{
+          const smk=code+'-'+sv;
+          used.add(smk);
+          items.push({code:code.padStart(2,'0'),variant:sv,price:basePrice,qty,mk:smk,memKey:smk,key:smk});
+        });
+      } else if(variant==='DR'){
+        ['D','R'].forEach(sv=>{
+          const smk=code+'-'+sv;
+          used.add(smk);
+          items.push({code:code.padStart(3,'0'),variant:sv,price:basePrice,qty,mk:smk,memKey:smk,key:smk});
+        });
+      } else if(variant==='B'){
+        // Pack คู่ — บันทึก code และ reverse
+        const rev = reverseCode2(code);
+        [code, rev].forEach(c=>{
+          const smk=c+'-B';
+          items.push({code:c.padStart(2,'0'),variant:'B',price:basePrice,qty,mk:smk,memKey:smk,key:smk});
+        });
+      } else {
+        const finalPrice = calcPrice(basePrice, variant);
+        const digits = code.length<=2 ? 2 : 3;
+        items.push({
+          code:code.padStart(digits,'0'), variant,
+          price:finalPrice, basePrice, qty,
+          mk, memKey:mk, key:mk,
+          multi: finalPrice!==basePrice ? Math.round(finalPrice/basePrice) : undefined
+        });
+      }
+    }
+
+    const subtotal = items.reduce((s,i)=>s+i.price*i.qty,0);
+    let discPct=0, discAmt=0, total=subtotal;
+    if(payType==='cash' && Math.random()<0.3){
+      discPct = pick([5,10,15]);
+      discAmt = subtotal*discPct/100;
+      total   = subtotal-discAmt;
+    }
+
+    sales.push({
+      billNo, num:b+1, customer, payType,
+      discPct, discAmt, subtotal,
+      date:dateObj.toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'}),
+      time:dt.toLocaleTimeString('th-TH'),
+      dateObj:dateObj.toISOString(),
+      items, total
+    });
+  }
+
+  return sales.sort((a,b)=>new Date(b.dateObj)-new Date(a.dateObj));
+}
+
+function log(msg,cls='hi'){
+  const el=document.getElementById('log');
+  el.style.display='block';
+  el.innerHTML+=`<span class="${cls}">${msg}</span>\n`;
+  el.scrollTop=el.scrollHeight;
+}
+
+async function doLoad(){
+  document.getElementById('log').innerHTML='';
+  document.getElementById('btn-load').disabled=true;
+  log('🔨 สร้างข้อมูล 100 บิล...','hi');
+
+  const sales = buildSales();
+  log('📤 กำลังส่งไป Firebase...','hi');
+
+  try{
+    const res = await fetch(FB_URL+'/sales_data.json',{
+      method:'PUT',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(sales)
+    });
+
+    if(res.ok){
+      const total    = sales.reduce((s,b)=>s+b.total,0);
+      const cashN    = sales.filter(s=>s.payType==='cash').length;
+      const custs    = new Set(sales.map(s=>s.customer));
+      const totalItems = sales.reduce((s,b)=>s+b.items.length,0);
+
+      // Top 5 variants
+      const vmap={};
+      sales.forEach(s=>s.items.forEach(i=>{
+        const k=i.code+'('+i.variant+')';
+        vmap[k]=(vmap[k]||0)+i.price*i.qty;
+      }));
+      const top5=Object.entries(vmap).sort((a,b)=>b[1]-a[1]).slice(0,5);
+
+      log('✅ อัปโหลด Firebase สำเร็จ!','ok');
+      log('─────────────────────────────','hi');
+      log(`📋 บิล      : ${sales.length} บิล  |  ${totalItems} รายการสินค้า`,'ok');
+      log(`👥 ลูกค้า   : ${custs.size} คน → ${[...custs].join(', ')}`,'ok');
+      log(`💵 Cash     : ${cashN} บิล  |  💳 Credit: ${100-cashN} บิล`,'hi');
+      log(`💰 ยอดรวม   : ฿${total.toLocaleString('th-TH',{minimumFractionDigits:2})}`,'gold');
+      log('📦 Top 5 สินค้า:','hi');
+      top5.forEach(([k,v])=>log(`   ${k.padEnd(12)} ฿${v.toLocaleString('th-TH')}`,'ok'));
+      log('─────────────────────────────','hi');
+      log('👉 เปิด dashboard.html แล้ว Refresh ได้เลย!','warn');
+    } else {
+      log('❌ Firebase error: '+res.status,'warn');
+    }
+  } catch(e){
+    log('❌ Error: '+e.message,'warn');
+    log('→ ตรวจสอบ Firebase Rules ว่า read/write = true','warn');
+  }
+
+  document.getElementById('btn-load').disabled=false;
+}
+
+async function doClear(){
+  if(!confirm('ยืนยันลบข้อมูลทั้งหมด?')) return;
+  document.getElementById('log').innerHTML='';
+  try{
+    await fetch(FB_URL+'/sales_data.json',{method:'DELETE'});
+    log('🗑️ ล้างข้อมูลเรียบร้อยแล้ว','warn');
+  }catch(e){
+    log('❌ Error: '+e.message,'warn');
+  }
+}
+</script>
+</body>
+</html>
