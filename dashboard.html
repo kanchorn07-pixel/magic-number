@@ -1753,32 +1753,6 @@ ${custList.map(([cust,c])=>'<tr><td><b>'+cust+'</b></td><td class="mono" style="
 </tbody></table>
 <div class="foot">ระบบขายสินค้า — ออกรายงานอัตโนมัติ</div>
 <script>window.onload=()=>{window.print()}<\/script>
-
-<!-- LOGIN OVERLAY -->
-<div id="login-overlay">
-  <div id="login-box">
-    <div id="login-logo">🔐</div>
-    <div id="login-title">Magic Number</div>
-    <div id="login-sub">กรุณาเข้าสู่ระบบก่อนใช้งาน</div>
-    <div class="login-field">
-      <label>ชื่อผู้ใช้</label>
-      <input type="text" id="login-user" placeholder="username" autocomplete="off">
-    </div>
-    <div class="login-field">
-      <label>รหัสผ่าน</label>
-      <input type="password" id="login-pass" placeholder="password" onkeydown="if(event.key==='Enter')doLogin()">
-    </div>
-    <button id="login-btn" onclick="doLogin()">เข้าสู่ระบบ</button>
-    <div id="login-err"></div>
-  </div>
-</div>
-<!-- USER BADGE (shown after login) -->
-<div id="login-user-badge" style="display:none" onclick="doLogout()">
-  <span id="badge-role-icon">👤</span>
-  <span id="badge-username">—</span>
-  <span style="opacity:.5;font-size:.7rem">ออกจากระบบ</span>
-</div>
-
 </body></html>`;
   const w = window.open('','_blank');
   if (w) { w.document.write(html); w.document.close(); }
@@ -1884,5 +1858,30 @@ function doLogout(){
 checkLogin();
 
 </script>
+
+<!-- LOGIN OVERLAY -->
+<div id="login-overlay">
+  <div id="login-box">
+    <div id="login-logo">🔐</div>
+    <div id="login-title">Magic Number</div>
+    <div id="login-sub">กรุณาเข้าสู่ระบบก่อนใช้งาน</div>
+    <div class="login-field">
+      <label>ชื่อผู้ใช้</label>
+      <input type="text" id="login-user" placeholder="username" autocomplete="off">
+    </div>
+    <div class="login-field">
+      <label>รหัสผ่าน</label>
+      <input type="password" id="login-pass" placeholder="password" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button id="login-btn" onclick="doLogin()">เข้าสู่ระบบ</button>
+    <div id="login-err"></div>
+  </div>
+</div>
+<div id="login-user-badge" style="display:none" onclick="doLogout()">
+  <span id="badge-role-icon">👤</span>
+  <span id="badge-username">—</span>
+  <span style="opacity:.5;font-size:.7rem">ออกจากระบบ</span>
+</div>
+
 </body>
 </html>
