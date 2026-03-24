@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ใบเสร็จรับเงิน</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Sarabun',sans-serif;background:#f5f0e8;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.receipt{background:#fff;border-radius:16px;max-width:400px;width:100%;box-shadow:0 8px 32px rgba(0,0,0,.12);overflow:hidden}
+.head{background:#1a1612;color:#f5f0e8;padding:24px 24px 20px;text-align:center}
+.head h1{font-size:1.1rem;font-weight:700;letter-spacing:1px;margin-bottom:4px}
+.head .bill-no{font-family:'JetBrains Mono',monospace;font-size:1rem;color:#c8a84b;font-weight:700}
+.head .meta{font-size:.75rem;color:#8b7355;margin-top:6px;line-height:1.8}
+.divider{border:none;border-top:2px dashed #e8e0d0;margin:0}
+.body{padding:20px 24px}
+.item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f0ebe0}
+.item:last-child{border-bottom:none}
+.item-left{display:flex;align-items:center;gap:8px}
+.code{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.95rem;color:#1a1612}
+.vtag{display:inline-block;padding:2px 7px;border-radius:4px;font-size:.68rem;font-weight:700;font-family:'JetBrains Mono',monospace}
+.vO,.vbน{background:rgba(41,128,185,.12);color:#2980b9}
+.vU,.vล่าง{background:rgba(212,160,23,.12);color:#c8930a}
+.vD{background:rgba(142,68,173,.12);color:#8e44ad}
+.vR{background:rgba(39,174,96,.12);color:#27ae60}
+.vB,.vกลับ{background:rgba(236,72,153,.12);color:#ec4899}
+.vOU{background:rgba(192,57,43,.12);color:#c0392b}
+.vDR{background:rgba(99,102,241,.12);color:#6366f1}
+.vZ{background:rgba(230,126,34,.12);color:#e67e22}
+.v6D{background:rgba(244,63,94,.12);color:#f43f5e}
+.v3LN{background:rgba(245,158,11,.12);color:#f59e0b}
+.v3LB{background:rgba(239,68,68,.12);color:#ef4444}
+.v3DU{background:rgba(6,182,212,.12);color:#06b6d4}
+.v3DF{background:rgba(16,185,129,.12);color:#10b981}
+.vR2ล่าง,.v2R{background:rgba(6,182,212,.12);color:#06b6d4}
+.vR3บน,.v3R{background:rgba(139,92,246,.12);color:#8b5cf6}
+.item-desc{font-size:.72rem;color:#8b7355;margin-top:2px}
+.item-amt{font-family:'JetBrains Mono',monospace;font-weight:700;color:#1a1612;font-size:.9rem}
+.summary{padding:16px 24px;background:#faf7f2;border-top:1px solid #e8e0d0}
+.sum-row{display:flex;justify-content:space-between;font-size:.82rem;color:#5a4a3a;margin-bottom:6px}
+.sum-row.disc{color:#27ae60}
+.sum-row.total{font-size:1.1rem;font-weight:700;color:#1a1612;margin-top:10px;padding-top:10px;border-top:2px solid #e8e0d0}
+.sum-row.total span:last-child{color:#c8a84b;font-family:'JetBrains Mono',monospace}
+.pay-badge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:.72rem;font-weight:700;margin-top:4px}
+.pay-cash{background:rgba(39,174,96,.12);color:#27ae60}
+.pay-credit{background:rgba(41,128,185,.12);color:#2980b9}
+.footer{padding:16px 24px;text-align:center;border-top:1px solid #e8e0d0}
+.footer p{font-size:.72rem;color:#a89880;line-height:2}
+.print-btn{display:block;width:calc(100% - 48px);margin:0 24px 20px;background:#1a1612;color:#f5f0e8;border:none;border-radius:8px;padding:12px;font-family:'Sarabun',sans-serif;font-size:.9rem;font-weight:700;cursor:pointer;transition:opacity .15s}
+.print-btn:hover{opacity:.85}
+.error{text-align:center;padding:40px 24px;color:#8b7355}
+.error h2{margin-bottom:8px;color:#c0392b}
+@media print{.print-btn{display:none}body{background:#fff}
+.receipt{box-shadow:none;border-radius:0;max-width:100%}}
+</style>
+</head>
+<body>
+<div class="receipt" id="receipt">
+  <div class="error" id="loading">
+    <div style="font-size:2rem;margin-bottom:12px">⏳</div>
+    กำลังโหลดข้อมูล...
+  </div>
+</div>
+
+<script>
+function getVariantLabel(v){
+  const map={O:'บน',U:'ล่าง',OU:'บน+ล่าง',B:'กลับ',D:'ตรง',R:'โต๊ด',DR:'ตรง/โต๊ด',
+    Z:'Z',  '6D':'6D','3LN':'3LN','3LB':'3LB','3DU':'3ตัวล่าง','3DF':'3ตัวหน้า',
+    'R2ล่าง':'R2ล่าง','R3บน':'R3บน'};
+  return map[v]||v;
+}
+
+function render(s){
+  const payLabel = s.payType==='cash'?'💵 เงินสด':'💳 เครดิต/โอน';
+  const payClass = s.payType==='cash'?'pay-cash':'pay-credit';
+
+  const itemsHTML = s.items.map(i=>{
+    const lbl = getVariantLabel(i.variant);
+    return `<div class="item">
+      <div class="item-left">
+        <div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span class="code">${i.code}</span>
+            <span class="vtag v${i.variant}">${lbl}</span>
+          </div>
+          <div class="item-desc">฿${i.price.toFixed(2)} × ${i.qty} ชิ้น</div>
+        </div>
+      </div>
+      <div class="item-amt">฿${(i.price*i.qty).toFixed(2)}</div>
+    </div>`;
+  }).join('');
+
+  const discHTML = s.discPct>0 ? `
+    <div class="sum-row"><span>ยอดก่อนส่วนลด</span><span>฿${(s.subtotal||s.total).toFixed(2)}</span></div>
+    <div class="sum-row disc"><span>💵 ส่วนลดเงินสด ${s.discPct}%</span><span>-฿${(s.discAmt||0).toFixed(2)}</span></div>
+  ` : '';
+
+  document.getElementById('receipt').innerHTML = `
+    <div class="head">
+      <h1>🧾 ใบเสร็จรับเงิน</h1>
+      <div class="bill-no">${s.billNo}</div>
+      <div class="meta">
+        👤 ${s.customer}<br>
+        📅 ${s.date} &nbsp;⏰ ${s.time}<br>
+        <span class="pay-badge ${payClass}">${payLabel}</span>
+      </div>
+    </div>
+    <hr class="divider">
+    <div class="body">${itemsHTML}</div>
+    <div class="summary">
+      ${discHTML}
+      <div class="sum-row total">
+        <span>ยอดสุทธิ</span>
+        <span>฿${s.total.toFixed(2)}</span>
+      </div>
+      <div style="font-size:.7rem;color:#a89880;margin-top:6px;text-align:center">${s.items.length} รายการ · ${s.items.reduce((t,i)=>t+i.qty,0)} ชิ้น</div>
+    </div>
+    <div class="footer">
+      <p>ขอบคุณที่ใช้บริการ 🙏<br>Magic Number System<br><span style="font-family:'JetBrains Mono',monospace;font-size:.65rem;color:#c8a84b">${s.billNo}</span></p>
+    </div>
+    <button class="print-btn" onclick="window.print()">🖨️ พิมพ์ใบเสร็จ</button>
+  `;
+}
+
+// อ่าน data จาก URL parameter
+try{
+  const params = new URLSearchParams(window.location.search);
+  const d = params.get('d');
+  if(!d) throw new Error('no data');
+  const json = decodeURIComponent(escape(atob(d)));
+  const sale = JSON.parse(json);
+  render(sale);
+} catch(e){
+  document.getElementById('receipt').innerHTML = `
+    <div class="error">
+      <h2>❌ ไม่พบข้อมูล</h2>
+      <p>QR Code อาจหมดอายุหรือข้อมูลไม่ถูกต้อง</p>
+    </div>`;
+}
+</script>
+</body>
+</html>

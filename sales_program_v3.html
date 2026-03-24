@@ -553,14 +553,14 @@ function goS4(){
   wrap.style.gridTemplateColumns=`repeat(${Math.min(vlist.length,4)},1fr)`;
   wrap.innerHTML=vlist.map(vt=>{
     let desc;
-    if(vt.combo)        desc=vt.v==='DR'?`(ตรง/สุ่ม)`:`(แยก ${vt.combo.length} รายการ)`;
+    if(vt.combo)        desc=vt.v==='DR'?`(ตรง/โต๊ด)`:`(แยก ${vt.combo.length} รายการ)`;
     else if(vt.pair)    desc=`(Pack คู่)`;
     else if(vt.dupOnly) desc=vt.v==='3LN'?`(เลขเบิ้ลปกติ)`:`(เบิ้ล 3 กลับ)`;
     else if(vt.multi>1) desc=`(× ${vt.multi})`;
     else if(vt.v==='D')   desc=`(ตรง)`;
-    else if(vt.v==='R')   desc=`(สุ่ม)`;
-    else if(vt.v==='3DU') desc=`(3 ตรงล่าง)`;
-    else if(vt.v==='3DF') desc=`(3 ตรงหน้า)`;
+    else if(vt.v==='R')   desc=`(โต๊ด)`;
+    else if(vt.v==='3DU') desc=`(3 ตัวล่าง)`;
+    else if(vt.v==='3DF') desc=`(3 ตัวหน้า)`;
     else                desc=``;
 
     // แถวบน = รหัส (v), แถวล่าง = ชื่อไทย (label) หรือ desc
@@ -960,12 +960,27 @@ function openRcpt(sale){
 
   document.getElementById('rcptmovl').classList.add('show');
 
-  // Generate QR code using Google Charts API (ทำงานได้บน HTTPS)
+  // Generate QR code — link ไปหน้า invoice viewer
   setTimeout(()=>{
     const box = document.getElementById('qr-box');
     if(!box) return;
-    const qrText = encodeURIComponent(`${sale.billNo}|${sale.customer}|฿${sale.total.toFixed(2)}|${sale.payType}|${sale.date}`);
-    box.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=148x148&data=${qrText}" width="148" height="148" style="border-radius:6px" onerror="this.parentNode.innerHTML='<div style=\'width:148px;height:148px;display:flex;align-items:center;justify-content:center;font-size:.7rem;color:#888;text-align:center\'>QR ไม่พร้อมใช้งาน</div>'">`;
+    // เข้ารหัส sale data เป็น base64 แล้วใส่ใน URL
+    const saleData = {
+      billNo: sale.billNo,
+      customer: sale.customer,
+      date: sale.date,
+      time: sale.time,
+      payType: sale.payType,
+      discPct: sale.discPct||0,
+      discAmt: sale.discAmt||0,
+      subtotal: sale.subtotal||sale.total,
+      total: sale.total,
+      items: sale.items.map(i=>({code:i.code,variant:i.variant,price:i.price,qty:i.qty}))
+    };
+    const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(saleData))));
+    const invoiceURL = `https://kanchorn07-pixel.github.io/magic-number/invoice.html?d=${encoded}`;
+    const qrText = encodeURIComponent(invoiceURL);
+    box.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=148x148&data=${qrText}" width="148" height="148" style="border-radius:6px;cursor:pointer" onclick="window.open('${invoiceURL}','_blank')" title="คลิกเพื่อเปิดใบเสร็จ" onerror="this.parentNode.innerHTML='<div style=\'width:148px;height:148px;display:flex;align-items:center;justify-content:center;font-size:.7rem;color:#888;text-align:center\'>QR ไม่พร้อมใช้งาน</div>'">`;
   }, 100);
 }
 
