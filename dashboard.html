@@ -688,154 +688,154 @@ body::before {
       <div class="page-header">
         <div>
           <div class="page-title">🎁 กิจกรรมรางวัล</div>
-          <div class="page-sub">กรอกตัวเลขโดนใจทุกแบบย่อย → คำนวณรางวัล → ดูผลและส่งออก</div>
+          <div class="page-sub">กรอกตัวเลขโดนใจ → คำนวณรางวัล → ดูผลและส่งออก</div>
         </div>
         <div style="display:flex;gap:10px;align-items:center">
-          <button id="rw-export-btn" onclick="rwExportPDF()" style="display:none;background:var(--surface2);color:var(--text2);border:1px solid var(--border);border-radius:8px;padding:9px 18px;font-family:'Sarabun',sans-serif;font-size:.85rem;cursor:pointer">
-            📄 ส่งออก PDF
-          </button>
-          <button id="rw-calc-btn" onclick="rwCalc()" disabled
-            style="background:var(--surface3);color:var(--text3);border:none;border-radius:8px;padding:10px 22px;font-family:'Sarabun',sans-serif;font-size:.9rem;font-weight:700;cursor:not-allowed;transition:all .2s">
-            ✨ คำนวณรางวัล
-          </button>
+          <button id="rw-export-btn" onclick="rwExportPDF()" style="display:none;background:var(--surface2);color:var(--text2);border:1px solid var(--border);border-radius:8px;padding:9px 18px;font-family:'Sarabun',sans-serif;font-size:.85rem;cursor:pointer">📄 ส่งออก PDF</button>
+          <button id="rw-calc-btn" onclick="rwCalc()" disabled style="background:var(--surface3);color:var(--text3);border:none;border-radius:8px;padding:10px 22px;font-family:'Sarabun',sans-serif;font-size:.9rem;font-weight:700;cursor:not-allowed;transition:all .2s">✨ คำนวณรางวัล</button>
         </div>
       </div>
 
-      <!-- NOTE ABOUT R VARIANT -->
-      <div style="background:rgba(16,185,129,.07);border:1px solid rgba(16,185,129,.2);border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:.82rem;color:var(--text2);line-height:1.7">
-        <b style="color:var(--green)">📌 กติกาแบบย่อย R (3 หลัก):</b>
-        ลูกค้าที่ซื้อสินค้ารหัส 3 หลัก ซึ่งเป็น <b>การสลับตำแหน่งตัวเลข</b>ของเลขที่ผู้บริหารกำหนด <b>เท่านั้น</b>
-        (ไม่รวมรหัสที่ตรงกันเป๊ะ ซึ่งนับเป็นแบบ D)
-        &nbsp;เช่น กำหนด <span style="font-family:'JetBrains Mono',monospace;color:var(--green)">123</span>
-        → ได้รางวัล: <span style="font-family:'JetBrains Mono',monospace;color:var(--green)">132, 213, 231, 312, 321</span>
-        &nbsp;(รหัส <span style="font-family:'JetBrains Mono',monospace;color:var(--text3)">123</span> เองไม่ได้รับ)
+      <!-- ROW 1: 2-digit -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+        <!-- O -->
+        <div class="card">
+          <div class="card-head" style="border-bottom:2px solid rgba(59,130,246,.3)"><h3 style="color:var(--blue)">🔵 2 หลัก — แบบ O (บน)</h3></div>
+          <div class="card-body" style="padding:12px">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+              <div><div class="rw-lbl">ตัวเลขโดนใจ</div><input class="rw-input" type="text" inputmode="numeric" id="ri-2-O-code" maxlength="2" placeholder="00–99" style="font-size:1.1rem;font-weight:700;text-align:center;color:var(--blue)" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,2);rwFieldChanged()"></div>
+              <div><div class="rw-lbl">มูลค่ารางวัล (×)</div><input class="rw-input" type="text" inputmode="numeric" id="ri-2-O-val" placeholder="เช่น 80" style="font-size:1.1rem;font-weight:700;text-align:center;color:var(--gold)" oninput="this.value=this.value.replace(/[^0-9]/g,'');rwFieldChanged()"></div>
+            </div>
+            <div id="rw-prev-2-O" class="rw-preview">—</div>
+          </div>
+        </div>
+        <!-- U -->
+        <div class="card">
+          <div class="card-head" style="border-bottom:2px solid rgba(245,158,11,.3)"><h3 style="color:var(--gold)">🟡 2 หลัก — แบบ U (ล่าง)</h3></div>
+          <div class="card-body" style="padding:12px">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+              <div><div class="rw-lbl">ตัวเลขโดนใจ</div><input class="rw-input" type="text" inputmode="numeric" id="ri-2-U-code" maxlength="2" placeholder="00–99" style="font-size:1.1rem;font-weight:700;text-align:center;color:var(--gold)" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,2);rwFieldChanged()"></div>
+              <div><div class="rw-lbl">มูลค่ารางวัล (×)</div><input class="rw-input" type="text" inputmode="numeric" id="ri-2-U-val" placeholder="เช่น 80" style="font-size:1.1rem;font-weight:700;text-align:center;color:var(--gold)" oninput="this.value=this.value.replace(/[^0-9]/g,'');rwFieldChanged()"></div>
+            </div>
+            <div id="rw-prev-2-U" class="rw-preview">—</div>
+          </div>
+        </div>
       </div>
 
-      <!-- SETUP: BOTH TYPES ALWAYS VISIBLE SIDE BY SIDE -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
-
-        <!-- 2-DIGIT -->
+      <!-- ROW 2: R2ล่าง R3บน -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+        <!-- R2ล่าง -->
         <div class="card">
-          <div class="card-head" style="border-bottom:2px solid rgba(59,130,246,.3)">
-            <h3 style="color:var(--blue)">🔵 สินค้า 2 หลัก (00–99)</h3>
-            <span style="font-size:.7rem;color:var(--text3)">แบบ O · แบบ U</span>
-          </div>
-          <div class="card-body" style="padding:14px">
-            <div id="rw2-O" class="rw-variant-block">
-              <div class="rw-variant-header" style="--vc:var(--blue)">
-                <span class="rw-vbadge" style="background:rgba(59,130,246,.15);color:var(--blue)">O</span>
-                <span style="font-size:.8rem;color:var(--text2)">แบบ O</span>
-              </div>
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
-                <div>
-                  <div class="rw-lbl">ตัวเลขโดนใจ</div>
-                  <input class="rw-input" type="text" inputmode="numeric" pattern="[0-9]*" id="ri-2-O-code" maxlength="2" placeholder="00–99"
-                    style="font-size:1.2rem;font-weight:700;text-align:center;letter-spacing:4px;color:var(--blue)"
-                    oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,2);rwFieldChanged()">
-                </div>
-                <div>
-                  <div class="rw-lbl">มูลค่ารางวัล (×)</div>
-                  <input class="rw-input" type="text" inputmode="numeric" pattern="[0-9]*" id="ri-2-O-val" placeholder="เช่น 80"
-                    style="font-size:1.2rem;font-weight:700;text-align:center;letter-spacing:4px;color:var(--gold)"
-                    oninput="this.value=this.value.replace(/[^0-9]/g,'');rwFieldChanged()">
-                </div>
-              </div>
-              <div id="rw-prev-2-O" class="rw-preview">—</div>
+          <div class="card-head" style="border-bottom:2px solid rgba(6,182,212,.3)"><h3 style="color:#06b6d4">🩵 1 หลัก — R2ล่าง</h3><span style="font-size:.68rem;color:var(--text3)">ตรงกับแบบ U</span></div>
+          <div class="card-body" style="padding:12px">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+              <div><div class="rw-lbl">ตัวเลขโดนใจ (0–9)</div><input class="rw-input" type="text" inputmode="numeric" id="ri-r2l-code" maxlength="1" placeholder="0–9" style="font-size:1.1rem;font-weight:700;text-align:center;color:#06b6d4" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,1);rwFieldChanged()"></div>
+              <div><div class="rw-lbl">มูลค่ารางวัล (×)</div><input class="rw-input" type="text" inputmode="numeric" id="ri-r2l-val" placeholder="เช่น 4" style="font-size:1.1rem;font-weight:700;text-align:center;color:var(--gold)" oninput="this.value=this.value.replace(/[^0-9]/g,'');rwFieldChanged()"></div>
             </div>
+            <div class="rw-preview" style="margin-top:6px;color:var(--text3);font-size:.7rem">ลูกค้าที่ซื้อ R2ล่าง แล้วตัวเลขตรงกับ U ที่กำหนด</div>
+          </div>
+        </div>
+        <!-- R3บน -->
+        <div class="card">
+          <div class="card-head" style="border-bottom:2px solid rgba(139,92,246,.3)"><h3 style="color:#8b5cf6">💜 1 หลัก — R3บน</h3><span style="font-size:.68rem;color:var(--text3)">ตรงกับแบบ D</span></div>
+          <div class="card-body" style="padding:12px">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+              <div><div class="rw-lbl">ตัวเลขโดนใจ (0–9)</div><input class="rw-input" type="text" inputmode="numeric" id="ri-r3b-code" maxlength="1" placeholder="0–9" style="font-size:1.1rem;font-weight:700;text-align:center;color:#8b5cf6" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,1);rwFieldChanged()"></div>
+              <div><div class="rw-lbl">มูลค่ารางวัล (×)</div><input class="rw-input" type="text" inputmode="numeric" id="ri-r3b-val" placeholder="เช่น 4" style="font-size:1.1rem;font-weight:700;text-align:center;color:var(--gold)" oninput="this.value=this.value.replace(/[^0-9]/g,'');rwFieldChanged()"></div>
+            </div>
+            <div class="rw-preview" style="margin-top:6px;color:var(--text3);font-size:.7rem">ลูกค้าที่ซื้อ R3บน แล้วตัวเลขตรงกับ D ที่กำหนด</div>
+          </div>
+        </div>
+      </div>
 
-            <div style="height:1px;background:var(--border);margin:14px 0"></div>
+      <!-- ROW 3: 3-digit D R -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+        <!-- D -->
+        <div class="card">
+          <div class="card-head" style="border-bottom:2px solid rgba(139,92,246,.3)"><h3 style="color:var(--purple)">🟣 3 หลัก — แบบ D (ตรง)</h3></div>
+          <div class="card-body" style="padding:12px">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+              <div><div class="rw-lbl">ตัวเลขโดนใจ</div><input class="rw-input" type="text" inputmode="numeric" id="ri-3-D-code" maxlength="3" placeholder="000–999" style="font-size:1.1rem;font-weight:700;text-align:center;color:var(--purple)" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,3);rwFieldChanged()"></div>
+              <div><div class="rw-lbl">มูลค่ารางวัล (×)</div><input class="rw-input" type="text" inputmode="numeric" id="ri-3-D-val" placeholder="เช่น 500" style="font-size:1.1rem;font-weight:700;text-align:center;color:var(--gold)" oninput="this.value=this.value.replace(/[^0-9]/g,'');rwFieldChanged()"></div>
+            </div>
+            <div id="rw-prev-3-D" class="rw-preview">—</div>
+          </div>
+        </div>
+        <!-- R -->
+        <div class="card">
+          <div class="card-head" style="border-bottom:2px solid rgba(16,185,129,.3)"><h3 style="color:var(--green)">🟢 3 หลัก — แบบ R (โต๊ด)</h3><span style="font-size:.68rem;background:rgba(16,185,129,.1);color:var(--green);border:1px solid rgba(16,185,129,.2);border-radius:10px;padding:2px 8px">สลับตำแหน่ง</span></div>
+          <div class="card-body" style="padding:12px">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+              <div><div class="rw-lbl">ตัวเลขโดนใจ</div><input class="rw-input" type="text" inputmode="numeric" id="ri-3-R-code" maxlength="3" placeholder="000–999" style="font-size:1.1rem;font-weight:700;text-align:center;color:var(--green)" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,3);rwFieldChanged()"></div>
+              <div><div class="rw-lbl">มูลค่ารางวัล (×)</div><input class="rw-input" type="text" inputmode="numeric" id="ri-3-R-val" placeholder="เช่น 100" style="font-size:1.1rem;font-weight:700;text-align:center;color:var(--gold)" oninput="this.value=this.value.replace(/[^0-9]/g,'');rwFieldChanged()"></div>
+            </div>
+            <div id="rw-prev-3-R" class="rw-preview">—</div>
+            <div id="rw-r-matches" style="display:none;margin-top:6px;padding:7px 10px;background:rgba(16,185,129,.05);border:1px solid rgba(16,185,129,.15);border-radius:6px;font-size:.7rem;color:var(--text3);font-family:'JetBrains Mono',monospace;line-height:1.9"></div>
+          </div>
+        </div>
+      </div>
 
-            <div id="rw2-U" class="rw-variant-block">
-              <div class="rw-variant-header">
-                <span class="rw-vbadge" style="background:rgba(245,158,11,.15);color:var(--gold)">U</span>
-                <span style="font-size:.8rem;color:var(--text2)">แบบ U</span>
+      <!-- ROW 4: 3DU 3DF (2 รางวัลต่อประเภท) -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+        <!-- 3DU -->
+        <div class="card">
+          <div class="card-head" style="border-bottom:2px solid rgba(6,182,212,.3)"><h3 style="color:#06b6d4">🔹 3 ตัวล่าง (3DU)</h3><span style="font-size:.68rem;color:var(--text3)">มี 2 รางวัล</span></div>
+          <div class="card-body" style="padding:12px">
+            <div style="margin-bottom:10px">
+              <div class="rw-lbl" style="margin-bottom:4px">รางวัลที่ 1</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                <div><input class="rw-input" type="text" inputmode="numeric" id="ri-3du-code1" maxlength="3" placeholder="000–999" style="text-align:center;color:#06b6d4;font-weight:700" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,3);rwFieldChanged()"></div>
+                <div><input class="rw-input" type="text" inputmode="numeric" id="ri-3du-val1" placeholder="มูลค่า ×" style="text-align:center;color:var(--gold);font-weight:700" oninput="this.value=this.value.replace(/[^0-9]/g,'');rwFieldChanged()"></div>
               </div>
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
-                <div>
-                  <div class="rw-lbl">ตัวเลขโดนใจ</div>
-                  <input class="rw-input" type="text" inputmode="numeric" pattern="[0-9]*" id="ri-2-U-code" maxlength="2" placeholder="00–99"
-                    style="font-size:1.2rem;font-weight:700;text-align:center;letter-spacing:4px;color:var(--gold)"
-                    oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,2);rwFieldChanged()">
-                </div>
-                <div>
-                  <div class="rw-lbl">มูลค่ารางวัล (×)</div>
-                  <input class="rw-input" type="text" inputmode="numeric" pattern="[0-9]*" id="ri-2-U-val" placeholder="เช่น 80"
-                    style="font-size:1.2rem;font-weight:700;text-align:center;letter-spacing:4px;color:var(--gold)"
-                    oninput="this.value=this.value.replace(/[^0-9]/g,'');rwFieldChanged()">
-                </div>
+            </div>
+            <div>
+              <div class="rw-lbl" style="margin-bottom:4px">รางวัลที่ 2</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                <div><input class="rw-input" type="text" inputmode="numeric" id="ri-3du-code2" maxlength="3" placeholder="000–999" style="text-align:center;color:#06b6d4;font-weight:700" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,3);rwFieldChanged()"></div>
+                <div><input class="rw-input" type="text" inputmode="numeric" id="ri-3du-val2" placeholder="มูลค่า ×" style="text-align:center;color:var(--gold);font-weight:700" oninput="this.value=this.value.replace(/[^0-9]/g,'');rwFieldChanged()"></div>
               </div>
-              <div id="rw-prev-2-U" class="rw-preview">—</div>
             </div>
           </div>
         </div>
-
-        <!-- 3-DIGIT -->
+        <!-- 3DF -->
         <div class="card">
-          <div class="card-head" style="border-bottom:2px solid rgba(139,92,246,.3)">
-            <h3 style="color:var(--purple)">🟣 สินค้า 3 หลัก (000–999)</h3>
-            <span style="font-size:.7rem;color:var(--text3)">แบบ D · แบบ R (สุ่มตำแหน่ง)</span>
-          </div>
-          <div class="card-body" style="padding:14px">
-            <div id="rw3-D" class="rw-variant-block">
-              <div class="rw-variant-header">
-                <span class="rw-vbadge" style="background:rgba(139,92,246,.15);color:var(--purple)">D</span>
-                <span style="font-size:.8rem;color:var(--text2)">แบบ D — ต้องตรงรหัสและตำแหน่ง</span>
+          <div class="card-head" style="border-bottom:2px solid rgba(16,185,129,.3)"><h3 style="color:#10b981">🔸 3 ตัวหน้า (3DF)</h3><span style="font-size:.68rem;color:var(--text3)">มี 2 รางวัล</span></div>
+          <div class="card-body" style="padding:12px">
+            <div style="margin-bottom:10px">
+              <div class="rw-lbl" style="margin-bottom:4px">รางวัลที่ 1</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                <div><input class="rw-input" type="text" inputmode="numeric" id="ri-3df-code1" maxlength="3" placeholder="000–999" style="text-align:center;color:#10b981;font-weight:700" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,3);rwFieldChanged()"></div>
+                <div><input class="rw-input" type="text" inputmode="numeric" id="ri-3df-val1" placeholder="มูลค่า ×" style="text-align:center;color:var(--gold);font-weight:700" oninput="this.value=this.value.replace(/[^0-9]/g,'');rwFieldChanged()"></div>
               </div>
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
-                <div>
-                  <div class="rw-lbl">ตัวเลขโดนใจ</div>
-                  <input class="rw-input" type="text" inputmode="numeric" pattern="[0-9]*" id="ri-3-D-code" maxlength="3" placeholder="000–999"
-                    style="font-size:1.2rem;font-weight:700;text-align:center;letter-spacing:4px;color:var(--purple)"
-                    oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,3);rwFieldChanged()">
-                </div>
-                <div>
-                  <div class="rw-lbl">มูลค่ารางวัล (×)</div>
-                  <input class="rw-input" type="text" inputmode="numeric" pattern="[0-9]*" id="ri-3-D-val" placeholder="เช่น 50"
-                    style="font-size:1.2rem;font-weight:700;text-align:center;letter-spacing:4px;color:var(--gold)"
-                    oninput="this.value=this.value.replace(/[^0-9]/g,'');rwFieldChanged()">
-                </div>
-              </div>
-              <div id="rw-prev-3-D" class="rw-preview">—</div>
             </div>
-
-            <div style="height:1px;background:var(--border);margin:14px 0"></div>
-
-            <div id="rw3-R" class="rw-variant-block">
-              <div class="rw-variant-header">
-                <span class="rw-vbadge" style="background:rgba(16,185,129,.15);color:var(--green)">R</span>
-                <span style="font-size:.8rem;color:var(--text2)">แบบ R — สลับตำแหน่งตัวเลข (ไม่รวมตรงเป๊ะ)</span>
-                <span style="margin-left:auto;font-size:.68rem;background:rgba(16,185,129,.1);color:var(--green);border:1px solid rgba(16,185,129,.2);border-radius:10px;padding:2px 8px">สลับตำแหน่ง</span>
+            <div>
+              <div class="rw-lbl" style="margin-bottom:4px">รางวัลที่ 2</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                <div><input class="rw-input" type="text" inputmode="numeric" id="ri-3df-code2" maxlength="3" placeholder="000–999" style="text-align:center;color:#10b981;font-weight:700" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,3);rwFieldChanged()"></div>
+                <div><input class="rw-input" type="text" inputmode="numeric" id="ri-3df-val2" placeholder="มูลค่า ×" style="text-align:center;color:var(--gold);font-weight:700" oninput="this.value=this.value.replace(/[^0-9]/g,'');rwFieldChanged()"></div>
               </div>
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
-                <div>
-                  <div class="rw-lbl">ตัวเลขโดนใจ</div>
-                  <input class="rw-input" type="text" inputmode="numeric" pattern="[0-9]*" id="ri-3-R-code" maxlength="3" placeholder="เช่น 009"
-                    style="font-size:1.2rem;font-weight:700;text-align:center;letter-spacing:4px;color:var(--green)"
-                    oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,3);rwFieldChanged()">
-                </div>
-                <div>
-                  <div class="rw-lbl">มูลค่ารางวัล (×)</div>
-                  <input class="rw-input" type="text" inputmode="numeric" pattern="[0-9]*" id="ri-3-R-val" placeholder="เช่น 50"
-                    style="font-size:1.2rem;font-weight:700;text-align:center;letter-spacing:4px;color:var(--gold)"
-                    oninput="this.value=this.value.replace(/[^0-9]/g,'');rwFieldChanged()">
-                </div>
-              </div>
-              <div id="rw-prev-3-R" class="rw-preview">—</div>
-              <!-- R matching preview -->
-              <div id="rw-r-matches" style="display:none;margin-top:8px;padding:8px 10px;background:rgba(16,185,129,.05);border:1px solid rgba(16,185,129,.15);border-radius:6px;font-size:.72rem;color:var(--text3);font-family:'JetBrains Mono',monospace;line-height:1.9"></div>
             </div>
           </div>
         </div>
+      </div>
+
+      <!-- NOTE Z SPECIAL -->
+      <div style="background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.2);border-radius:10px;padding:12px 16px;margin-bottom:14px;font-size:.8rem;color:var(--text2);line-height:1.9">
+        <b style="color:var(--gold)">⭐ รางวัลพิเศษ Z (ลุ้น 4 ต่อ):</b><br>
+        ลูกค้าที่ซื้อ <b>Z</b> แล้วรหัสตรงกับ D / R / 3DU / 3DF → ได้รับรางวัลเพิ่มอัตโนมัติ<br>
+        <span style="color:var(--text3)">Z(×3) ตรง 3DU/3DF → รางวัลเท่ากับ R &nbsp;|&nbsp; Z(×6) ตรง 3DU/3DF → รางวัลเท่ากับ D</span>
       </div>
 
       <!-- FILL STATUS BAR -->
-      <div id="rw-fill-status" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 16px;margin-bottom:16px;font-size:.8rem;color:var(--text3);display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      <div id="rw-fill-status" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 16px;margin-bottom:16px;font-size:.8rem;color:var(--text3);display:flex;align-items:center;gap:10px;flex-wrap:wrap">
         <span>สถานะ:</span>
-        <span id="rw-status-2O">⬜ 2 หลัก แบบ O</span>
-        <span id="rw-status-2U">⬜ 2 หลัก แบบ U</span>
-        <span id="rw-status-3D">⬜ 3 หลัก แบบ D</span>
-        <span id="rw-status-3R">⬜ 3 หลัก แบบ R</span>
-        <span id="rw-fill-note" style="margin-left:auto;color:var(--text3)">กรอกให้ครบทุกแบบย่อยก่อนคำนวณ</span>
+        <span id="rw-status-2O">⬜ O</span>
+        <span id="rw-status-2U">⬜ U</span>
+        <span id="rw-status-3D">⬜ D</span>
+        <span id="rw-status-3R">⬜ R</span>
+        <span id="rw-status-r2l">⬜ R2ล่าง</span>
+        <span id="rw-status-r3b">⬜ R3บน</span>
+        <span id="rw-fill-note" style="margin-left:auto;color:var(--text3)">กรอก O, U, D, R ให้ครบก่อนคำนวณ</span>
       </div>
 
       <!-- SAVED RESULTS TABS -->
@@ -1529,19 +1529,32 @@ function rwFieldChanged() {
 }
 
 function rwCheckFields() {
-  const defs = [
-    { id:'2O', code:'ri-2-O-code', val:'ri-2-O-val', lbl:'rw-status-2O', label:'2 หลัก O' },
-    { id:'2U', code:'ri-2-U-code', val:'ri-2-U-val', lbl:'rw-status-2U', label:'2 หลัก U' },
-    { id:'3D', code:'ri-3-D-code', val:'ri-3-D-val', lbl:'rw-status-3D', label:'3 หลัก D' },
-    { id:'3R', code:'ri-3-R-code', val:'ri-3-R-val', lbl:'rw-status-3R', label:'3 หลัก R' },
+  // บังคับ 4 ตัวหลัก: O, U, D, R
+  const required = [
+    { code:'ri-2-O-code', val:'ri-2-O-val', lbl:'rw-status-2O', label:'O' },
+    { code:'ri-2-U-code', val:'ri-2-U-val', lbl:'rw-status-2U', label:'U' },
+    { code:'ri-3-D-code', val:'ri-3-D-val', lbl:'rw-status-3D', label:'D' },
+    { code:'ri-3-R-code', val:'ri-3-R-val', lbl:'rw-status-3R', label:'R' },
+  ];
+  // optional: R2ล่าง, R3บน
+  const optional = [
+    { code:'ri-r2l-code', val:'ri-r2l-val', lbl:'rw-status-r2l', label:'R2ล่าง' },
+    { code:'ri-r3b-code', val:'ri-r3b-val', lbl:'rw-status-r3b', label:'R3บน' },
   ];
   let allFilled = true;
-  defs.forEach(f => {
+  required.forEach(f => {
     const ok = (document.getElementById(f.code)||{}).value?.trim().length > 0
             && parseFloat((document.getElementById(f.val)||{}).value) > 0;
     const lbl = document.getElementById(f.lbl);
     if (lbl) { lbl.textContent = (ok?'✅ ':'⬜ ') + f.label; lbl.style.color = ok?'var(--green)':'var(--text3)'; }
     if (!ok) allFilled = false;
+  });
+  optional.forEach(f => {
+    const hasCode = (document.getElementById(f.code)||{}).value?.trim().length > 0;
+    const hasVal  = parseFloat((document.getElementById(f.val)||{}).value) > 0;
+    const ok = hasCode && hasVal;
+    const lbl = document.getElementById(f.lbl);
+    if (lbl) { lbl.textContent = (ok?'✅ ':'➕ ') + f.label; lbl.style.color = ok?'var(--green)':'var(--text3)'; }
   });
   const btn = document.getElementById('rw-calc-btn');
   const note = document.getElementById('rw-fill-note');
@@ -1551,47 +1564,111 @@ function rwCheckFields() {
     btn.style.color      = allFilled ? '#0b0f1a'    : 'var(--text3)';
     btn.style.cursor     = allFilled ? 'pointer'    : 'not-allowed';
   }
-  if (note) note.textContent = allFilled ? '✅ พร้อมคำนวณ' : 'กรอกให้ครบทุกแบบย่อยก่อนคำนวณ';
+  if (note) note.textContent = allFilled ? '✅ พร้อมคำนวณ (R2ล่าง R3บน 3DU 3DF เป็น Optional)' : 'กรอก O, U, D, R ให้ครบก่อนคำนวณ';
 }
 
 function rwCalc() {
   allSales = loadSales();
-  const defs = [
-    { key:'2-O', digits:2, variant:'O', matchType:'exact' },
-    { key:'2-U', digits:2, variant:'U', matchType:'exact' },
-    { key:'3-D', digits:3, variant:'D', matchType:'exact' },
-    { key:'3-R', digits:3, variant:'R', matchType:'anagram' },
+
+  // helper
+  const gv = id => (document.getElementById(id)||{}).value||'';
+  const gn = id => parseFloat(gv(id))||0;
+
+  // ── configs หลัก O, U, D, R ──
+  const configs = [
+    { key:'2-O', label:'O (บน)',    digits:2, variant:'O',  matchType:'exact',   code:gv('ri-2-O-code').trim().padStart(2,'0'), rewardVal:gn('ri-2-O-val'), totalSales:0, totalReward:0, customers:{} },
+    { key:'2-U', label:'U (ล่าง)', digits:2, variant:'U',  matchType:'exact',   code:gv('ri-2-U-code').trim().padStart(2,'0'), rewardVal:gn('ri-2-U-val'), totalSales:0, totalReward:0, customers:{} },
+    { key:'3-D', label:'D (ตรง)',   digits:3, variant:'D',  matchType:'exact',   code:gv('ri-3-D-code').trim().padStart(3,'0'), rewardVal:gn('ri-3-D-val'), totalSales:0, totalReward:0, customers:{} },
+    { key:'3-R', label:'R (โต๊ด)',  digits:3, variant:'R',  matchType:'anagram', code:gv('ri-3-R-code').trim().padStart(3,'0'), rewardVal:gn('ri-3-R-val'), totalSales:0, totalReward:0, customers:{} },
   ];
-  const configs = defs.map(d => ({
-    ...d,
-    code:      ((document.getElementById('ri-'+d.key+'-code')||{}).value||'').trim().padStart(d.digits,'0'),
-    rewardVal: parseFloat((document.getElementById('ri-'+d.key+'-val')||{}).value) || 0,
-    totalSales:0, totalReward:0, customers:{},
-  }));
+
+  // ── configs optional ──
+  const r2lCode = gv('ri-r2l-code').trim(); const r2lVal = gn('ri-r2l-val');
+  const r3bCode = gv('ri-r3b-code').trim(); const r3bVal = gn('ri-r3b-val');
+  // 3DU 2 รางวัล
+  const tdu1Code = gv('ri-3du-code1').trim().padStart(3,'0'); const tdu1Val = gn('ri-3du-val1');
+  const tdu2Code = gv('ri-3du-code2').trim().padStart(3,'0'); const tdu2Val = gn('ri-3du-val2');
+  // 3DF 2 รางวัล
+  const tdf1Code = gv('ri-3df-code1').trim().padStart(3,'0'); const tdf1Val = gn('ri-3df-val1');
+  const tdf2Code = gv('ri-3df-code2').trim().padStart(3,'0'); const tdf2Val = gn('ri-3df-val2');
+
+  // รางวัล R สำหรับ Z พิเศษ
+  const rVal = gn('ri-3-R-val');
+  const dVal = gn('ri-3-D-val');
+
+  // ── optional reward configs ──
+  const optionals = [];
+  if(r2lCode && r2lVal) optionals.push({ key:'r2l', label:'R2ล่าง', digits:1, variant:'R2ล่าง', matchType:'exact', code:r2lCode, rewardVal:r2lVal, totalSales:0, totalReward:0, customers:{} });
+  if(r3bCode && r3bVal) optionals.push({ key:'r3b', label:'R3บน',   digits:1, variant:'R3บน',   matchType:'exact', code:r3bCode, rewardVal:r3bVal, totalSales:0, totalReward:0, customers:{} });
+  if(tdu1Code && tdu1Val) optionals.push({ key:'3du1', label:'3DU รางวัล 1', digits:3, variant:'3DU', matchType:'exact', code:tdu1Code, rewardVal:tdu1Val, totalSales:0, totalReward:0, customers:{} });
+  if(tdu2Code && tdu2Val) optionals.push({ key:'3du2', label:'3DU รางวัล 2', digits:3, variant:'3DU', matchType:'exact', code:tdu2Code, rewardVal:tdu2Val, totalSales:0, totalReward:0, customers:{} });
+  if(tdf1Code && tdf1Val) optionals.push({ key:'3df1', label:'3DF รางวัล 1', digits:3, variant:'3DF', matchType:'exact', code:tdf1Code, rewardVal:tdf1Val, totalSales:0, totalReward:0, customers:{} });
+  if(tdf2Code && tdf2Val) optionals.push({ key:'3df2', label:'3DF รางวัล 2', digits:3, variant:'3DF', matchType:'exact', code:tdf2Code, rewardVal:tdf2Val, totalSales:0, totalReward:0, customers:{} });
+
+  const allConfigs = [...configs, ...optionals];
+
+  // Z พิเศษ: เก็บลูกค้าที่ซื้อ Z แต่ละรหัส
+  const zSpecial = {}; // key=code → { cust, sales, variants:[Z3/Z6], zRewards:[] }
 
   allSales.forEach(sale => {
     sale.items.forEach(item => {
-      const cfg = configs.find(c => c.variant === item.variant);
-      if (!cfg) return;
-      const itemCode = item.code.padStart(cfg.digits,'0');
-      const matched = cfg.matchType === 'exact'
-        ? itemCode === cfg.code
-        : rwRMatch(cfg.code, itemCode);
-      if (!matched) return;
-      const lineAmt = item.price * item.qty;
-      cfg.totalSales += lineAmt;
-      if (!cfg.customers[sale.customer]) cfg.customers[sale.customer] = { sales:0, reward:0, bills:new Set(), matchedCodes:new Set() };
-      cfg.customers[sale.customer].sales += lineAmt;
-      cfg.customers[sale.customer].bills.add(sale.billNo);
-      cfg.customers[sale.customer].matchedCodes.add(itemCode);
+      // ── ตรวจรางวัลหลัก ──
+      allConfigs.forEach(cfg => {
+        if(cfg.variant !== item.variant) return;
+        const itemCode = item.code.padStart(cfg.digits,'0');
+        let matched = false;
+        if(cfg.matchType === 'exact')   matched = itemCode === cfg.code;
+        if(cfg.matchType === 'anagram') matched = rwRMatch(cfg.code, itemCode);
+        // R2ล่าง: ตรงกับ U code (1 หลัก ตรงตัวใดตัวหนึ่งใน code 2 หลัก)
+        if(cfg.variant === 'R2ล่าง') matched = item.code === r2lCode || item.code.padStart(2,'0') === r2lCode.padStart(2,'0');
+        // R3บน: ตรงกับ D code (1 หลัก ตรงตัวใดตัวหนึ่งใน code 3 หลัก)
+        if(cfg.variant === 'R3บน')   matched = item.code === r3bCode || item.code.padStart(3,'0') === r3bCode.padStart(3,'0');
+        if(!matched) return;
+        const lineAmt = item.price * item.qty;
+        cfg.totalSales += lineAmt;
+        if(!cfg.customers[sale.customer]) cfg.customers[sale.customer] = { sales:0, reward:0, bills:new Set(), matchedCodes:new Set() };
+        cfg.customers[sale.customer].sales += lineAmt;
+        cfg.customers[sale.customer].bills.add(sale.billNo);
+        cfg.customers[sale.customer].matchedCodes.add(itemCode);
+      });
+
+      // ── Z พิเศษ ──
+      if(item.variant === 'Z' || item.variant === '6D'){
+        const zCode = item.code.padStart(3,'0');
+        const isZ3 = item.variant === 'Z';   // Z ×3
+        const isZ6 = item.variant === '6D';  // Z ×6 (6D)
+        const dCode = gv('ri-3-D-code').trim().padStart(3,'0');
+        const rCode = gv('ri-3-R-code').trim().padStart(3,'0');
+        const zRewards = [];
+
+        if(dCode && zCode === dCode){
+          zRewards.push({ reason:'ตรงกับ D', rewardVal: isZ3 ? dVal : dVal });
+        }
+        if(rCode && rwRMatch(rCode, zCode)){
+          zRewards.push({ reason:'ตรงกับ R (โต๊ด)', rewardVal: isZ3 ? rVal : rVal });
+        }
+        // Z ×3 ตรง 3DU/3DF → รางวัลเท่ากับ R
+        // Z ×6 ตรง 3DU/3DF → รางวัลเท่ากับ D
+        [[tdu1Code,tdu1Val,'3DU รางวัล 1'],[tdu2Code,tdu2Val,'3DU รางวัล 2'],
+         [tdf1Code,tdf1Val,'3DF รางวัล 1'],[tdf2Code,tdf2Val,'3DF รางวัล 2']].forEach(([c,,lbl])=>{
+          if(c && zCode === c) zRewards.push({ reason:'ตรงกับ '+lbl, rewardVal: isZ3 ? rVal : dVal });
+        });
+
+        if(zRewards.length > 0){
+          const lineAmt = item.price * item.qty;
+          const zKey = sale.customer + '|' + zCode + '|' + item.variant;
+          if(!zSpecial[zKey]) zSpecial[zKey] = { customer:sale.customer, code:zCode, variant:item.variant, sales:0, zRewards, bills:new Set() };
+          zSpecial[zKey].sales += lineAmt;
+          zSpecial[zKey].bills.add(sale.billNo);
+        }
+      }
     });
   });
 
-  // ยอดขายรวมทุกบิลทุก Transaction (ทั้งหมดในระบบ)
   const totalAllSales = allSales.reduce((s, sale) => s + sale.total, 0);
 
   let grandSales=0, grandReward=0;
-  configs.forEach(c => {
+  allConfigs.forEach(c => {
     c.totalReward = c.totalSales * c.rewardVal;
     grandSales += c.totalSales; grandReward += c.totalReward;
     Object.keys(c.customers).forEach(cust => {
@@ -1599,16 +1676,32 @@ function rwCalc() {
     });
   });
 
+  // รวม Z พิเศษเข้ายอดรางวัล
+  Object.values(zSpecial).forEach(z => {
+    z.zRewards.forEach(r => { grandReward += z.sales * r.rewardVal; });
+  });
+
   const custMap = {};
-  configs.forEach(cfg => {
+  allConfigs.forEach(cfg => {
     Object.entries(cfg.customers).forEach(([cust, c]) => {
-      if (!custMap[cust]) custMap[cust] = { sales:0, reward:0, details:[] };
+      if(!custMap[cust]) custMap[cust] = { sales:0, reward:0, details:[] };
       custMap[cust].sales  += c.sales;
       custMap[cust].reward += c.reward;
-      custMap[cust].details.push({ variant:cfg.variant, code:cfg.code, matchType:cfg.matchType,
+      custMap[cust].details.push({ variant:cfg.variant, label:cfg.label, code:cfg.code, matchType:cfg.matchType,
         sales:c.sales, reward:c.reward, bills:c.bills.size, matchedCodes:[...c.matchedCodes] });
     });
   });
+  // เพิ่ม Z พิเศษในรายลูกค้า
+  Object.values(zSpecial).forEach(z => {
+    if(!custMap[z.customer]) custMap[z.customer] = { sales:0, reward:0, details:[] };
+    z.zRewards.forEach(r => {
+      const zReward = z.sales * r.rewardVal;
+      custMap[z.customer].reward += zReward;
+      custMap[z.customer].details.push({ variant:z.variant, label:`⭐ ${z.variant} ${r.reason}`, code:z.code,
+        matchType:'exact', sales:z.sales, reward:zReward, bills:z.bills.size, matchedCodes:[z.code] });
+    });
+  });
+
   Object.keys(custMap).forEach(cust => {
     const b = parseFloat(custBonus[cust]||0);
     custMap[cust].bonus = b;
@@ -1619,7 +1712,7 @@ function rwCalc() {
   const session = { id:Date.now(),
     label: now.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}),
     timestamp: now.toLocaleString('th-TH'),
-    configs, custMap, grandSales, grandReward, totalAllSales, custBonus:{...custBonus} };
+    configs: allConfigs, custMap, grandSales, grandReward, totalAllSales, custBonus:{...custBonus} };
   rwSessions.unshift(session);
   rwActiveTab = session.id;
   renderRwTabs(); renderRwResult(session);
@@ -1676,7 +1769,7 @@ function renderRwResult(session) {
       <div style="overflow-x:auto"><table class="bill-table">
         <thead><tr><th>แบบย่อย</th><th>รหัสที่กำหนด</th><th style="text-align:right">ตัวคูณ</th><th style="text-align:right">ยอดขายรวม</th><th style="text-align:right">มูลค่ารางวัล</th></tr></thead>
         <tbody>${configs.map(c=>`<tr>
-          <td>${mkTag(c.variant)}${c.matchType==='anagram'?' <span style="font-size:.67rem;color:var(--green)">สลับตำแหน่ง</span>':''}</td>
+          <td>${mkTag(c.variant)}${c.matchType==='anagram'?' <span style="font-size:.67rem;color:var(--green)">สลับตำแหน่ง</span>':''} <span style="font-size:.72rem;color:var(--text3)">${c.label||''}</span></td>
           <td style="font-family:'JetBrains Mono',monospace;font-weight:700;color:${c.digits===2?'var(--blue)':'var(--purple)'}">${c.code}</td>
           <td style="text-align:right;font-family:'JetBrains Mono',monospace;color:var(--gold)">× ${c.rewardVal.toLocaleString('th-TH')}</td>
           <td style="text-align:right;font-family:'JetBrains Mono',monospace;color:var(--green)">฿${c.totalSales.toLocaleString('th-TH',{minimumFractionDigits:2})}</td>
