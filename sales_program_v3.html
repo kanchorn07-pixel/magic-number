@@ -960,25 +960,31 @@ function openRcpt(sale){
 
   document.getElementById('rcptmovl').classList.add('show');
 
-  // Generate QR code — link ไปหน้า invoice viewer
-  setTimeout(()=>{
+  // Generate QR code — บันทึกใน Firebase แล้ว QR link แค่เลขบิล
+  setTimeout(async ()=>{
     const box = document.getElementById('qr-box');
     if(!box) return;
-    // เข้ารหัส sale data เป็น base64 แล้วใส่ใน URL
-    const saleData = {
-      billNo: sale.billNo,
-      customer: sale.customer,
-      date: sale.date,
-      time: sale.time,
-      payType: sale.payType,
-      discPct: sale.discPct||0,
-      discAmt: sale.discAmt||0,
-      subtotal: sale.subtotal||sale.total,
-      total: sale.total,
-      items: sale.items.map(i=>({code:i.code,variant:i.variant,price:i.price,qty:i.qty}))
-    };
-    const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(saleData))));
-    const invoiceURL = `https://kanchorn07-pixel.github.io/magic-number/invoice.html?d=${encoded}`;
+    try{
+      // บันทึก invoice ลง Firebase
+      await fetch(FB_URL + '/invoices/' + sale.billNo + '.json', {
+        method:'PUT',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          billNo: sale.billNo,
+          customer: sale.customer,
+          date: sale.date,
+          time: sale.time,
+          payType: sale.payType,
+          discPct: sale.discPct||0,
+          discAmt: sale.discAmt||0,
+          subtotal: sale.subtotal||sale.total,
+          total: sale.total,
+          items: sale.items.map(i=>({code:i.code,variant:i.variant,price:i.price,qty:i.qty}))
+        })
+      });
+    }catch(e){}
+    // QR link สั้น — แค่ bill number
+    const invoiceURL = `https://kanchorn07-pixel.github.io/magic-number/invoice.html?bill=${sale.billNo}`;
     const qrText = encodeURIComponent(invoiceURL);
     box.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=148x148&data=${qrText}" width="148" height="148" style="border-radius:6px;cursor:pointer" onclick="window.open('${invoiceURL}','_blank')" title="คลิกเพื่อเปิดใบเสร็จ" onerror="this.parentNode.innerHTML='<div style=\'width:148px;height:148px;display:flex;align-items:center;justify-content:center;font-size:.7rem;color:#888;text-align:center\'>QR ไม่พร้อมใช้งาน</div>'">`;
   }, 100);

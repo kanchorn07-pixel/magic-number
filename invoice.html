@@ -123,21 +123,43 @@ function render(s){
   `;
 }
 
-// อ่าน data จาก URL parameter
-try{
+// อ่าน data จาก Firebase โดยใช้เลขบิล
+const FB_URL = 'https://magic-number-7b488-default-rtdb.asia-southeast1.firebasedatabase.app';
+
+async function loadInvoice(){
   const params = new URLSearchParams(window.location.search);
-  const d = params.get('d');
-  if(!d) throw new Error('no data');
-  const json = decodeURIComponent(escape(atob(d)));
-  const sale = JSON.parse(json);
-  render(sale);
-} catch(e){
-  document.getElementById('receipt').innerHTML = `
-    <div class="error">
-      <h2>❌ ไม่พบข้อมูล</h2>
-      <p>QR Code อาจหมดอายุหรือข้อมูลไม่ถูกต้อง</p>
-    </div>`;
+  const billNo = params.get('bill');
+  const d      = params.get('d'); // fallback สำหรับ QR เก่า
+
+  if(billNo){
+    try{
+      const res  = await fetch(`${FB_URL}/invoices/${billNo}.json`);
+      const sale = await res.json();
+      if(!sale) throw new Error('not found');
+      render(sale);
+    }catch(e){
+      document.getElementById('receipt').innerHTML = `
+        <div class="error">
+          <h2>❌ ไม่พบข้อมูล</h2>
+          <p>เลขบิล ${billNo} ไม่พบในระบบ</p>
+        </div>`;
+    }
+  } else if(d){
+    // fallback: base64 encoded data (QR เก่า)
+    try{
+      const json = decodeURIComponent(escape(atob(d)));
+      render(JSON.parse(json));
+    }catch(e){
+      document.getElementById('receipt').innerHTML = `
+        <div class="error"><h2>❌ ข้อมูลไม่ถูกต้อง</h2></div>`;
+    }
+  } else {
+    document.getElementById('receipt').innerHTML = `
+      <div class="error"><h2>❌ ไม่พบข้อมูล</h2><p>กรุณาสแกน QR จากใบเสร็จ</p></div>`;
+  }
 }
+
+loadInvoice();
 </script>
 </body>
 </html>
