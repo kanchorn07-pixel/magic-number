@@ -410,7 +410,16 @@ body::before {
     <div class="sidebar-logo">
       <span class="logo-icon">📊</span>
       <h2>Dashboard</h2>
-      <p>ผู้บริหาร</p>
+      <!-- ชื่อผู้ใช้งานปัจจุบัน -->
+      <div id="sidebar-user" style="display:none;margin-top:10px;padding:8px 10px;background:var(--surface2);border-radius:8px;border:1px solid var(--border)">
+        <div style="display:flex;align-items:center;gap:7px">
+          <span id="sidebar-role-icon" style="font-size:1rem">👤</span>
+          <div>
+            <div id="sidebar-username" style="font-size:.82rem;font-weight:700;color:var(--text)">—</div>
+            <div id="sidebar-role-text" style="font-size:.65rem;color:var(--text3);font-family:'JetBrains Mono',monospace">—</div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <span class="nav-label">รายงาน</span>
@@ -435,7 +444,11 @@ body::before {
 
     <div class="sidebar-footer">
       <div id="dash-datetime">—</div>
-      <div style="margin-top:4px">ระบบขายสินค้า v3</div>
+      <div style="margin-top:4px;margin-bottom:10px">ระบบขายสินค้า v3</div>
+      <!-- ปุ่ม Logout -->
+      <button id="sidebar-logout" onclick="doLogout()" style="display:none;width:100%;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:8px;padding:9px;color:#f87171;font-family:'Sarabun',sans-serif;font-size:.82rem;cursor:pointer;transition:all .15s;text-align:center">
+        🚪 ออกจากระบบ
+      </button>
     </div>
   </div>
 
@@ -1855,10 +1868,17 @@ async function doLogin(){
 
 function applySession(u){
   document.getElementById('login-overlay').style.display='none';
-  const badge = document.getElementById('login-user-badge');
-  badge.style.display='flex';
-  document.getElementById('badge-username').textContent=u.name||u.username;
-  document.getElementById('badge-role-icon').textContent=u.role==='admin'?'👑':u.role==='manager'?'📊':'🛒';
+  // แสดงชื่อ user ใน sidebar บนซ้าย
+  const roleLabel = u.role==='admin'?'ผู้ดูแลระบบ':u.role==='manager'?'ผู้บริหาร':'ผู้ขาย';
+  const roleIcon  = u.role==='admin'?'👑':u.role==='manager'?'📊':'🛒';
+  document.getElementById('sidebar-user').style.display='';
+  document.getElementById('sidebar-username').textContent = u.name||u.username;
+  document.getElementById('sidebar-role-icon').textContent = roleIcon;
+  document.getElementById('sidebar-role-text').textContent = roleLabel;
+  // แสดงปุ่ม logout ใน sidebar ล่าง
+  document.getElementById('sidebar-logout').style.display='';
+  // ซ่อน floating badge เดิม
+  document.getElementById('login-user-badge').style.display='none';
   initDashboard();
 }
 
