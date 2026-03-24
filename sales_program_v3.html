@@ -398,7 +398,7 @@ tbody tr:hover td{background:rgba(0,0,0,.02)}
 <div class="toast" id="tst"></div>
 
 <!-- QR Code library -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" crossorigin="anonymous"></script>
 <script>
 // ── STATE ──────────────────────────────────────────────────
 let CUR_STEP=1, custName='', selT=null, curCode='', selV=null, selPT=null;
@@ -959,8 +959,10 @@ function openRcpt(sale){
     if(!box) return;
     box.innerHTML = '';
     try {
+      if(typeof QRCode === 'undefined') throw new Error('lib not loaded');
+      const qrText = `${sale.billNo}|${sale.customer}|${sale.total.toFixed(2)}THB|${sale.payType}`;
       new QRCode(box, {
-        text: qrLines,
+        text: qrText,
         width: 148,
         height: 148,
         colorDark: '#1a1612',
@@ -970,7 +972,7 @@ function openRcpt(sale){
     } catch(e) {
       box.innerHTML = '<div style="width:148px;height:148px;display:flex;align-items:center;justify-content:center;font-size:.7rem;color:var(--ink3);text-align:center">QR ไม่พร้อมใช้งาน</div>';
     }
-  }, 80);
+  }, 300);
 }
 
 function closeRcpt(e){if(!e||e.target===document.getElementById('rcptmovl'))document.getElementById('rcptmovl').classList.remove('show');}
