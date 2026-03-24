@@ -562,9 +562,15 @@ function goS4(){
     else if(vt.v==='3DU') desc=`(3 ตรงล่าง)`;
     else if(vt.v==='3DF') desc=`(3 ตรงหน้า)`;
     else                desc=``;
+
+    // แถวบน = รหัส (v), แถวล่าง = ชื่อไทย (label) หรือ desc
+    const topText  = vt.v;
+    const botText  = vt.label ? vt.label : (desc ? desc : vt.v);
+    const fontSize = vt.v.length > 3 ? '.75rem' : vt.v.length > 2 ? '.85rem' : '1.1rem';
+
     return `<button class="vbtn ${vt.c}" id="vb${vt.v}" onclick="pickV('${vt.v}')">
-      <span class="vletter" style="font-size:${(vt.label||vt.v).length>3?'.75rem':vt.v.length>2?'.85rem':'1.1rem'}">${vt.label||vt.v}</span>
-      <span class="vdesc">${desc||('แบบ '+(vt.label||vt.v))}</span>
+      <span class="vletter" style="font-size:${fontSize}">${topText}</span>
+      <span class="vdesc">${botText}</span>
     </button>`;
   }).join('');
   selV=null;
@@ -954,26 +960,13 @@ function openRcpt(sale){
 
   document.getElementById('rcptmovl').classList.add('show');
 
-  // Generate QR code after DOM is updated
+  // Generate QR code using Google Charts API (ทำงานได้บน HTTPS)
   setTimeout(()=>{
     const box = document.getElementById('qr-box');
     if(!box) return;
-    box.innerHTML = '';
-    try {
-      if(typeof QRCode === 'undefined') throw new Error('lib not loaded');
-      const qrText = `${sale.billNo}|${sale.customer}|${sale.total.toFixed(2)}THB|${sale.payType}`;
-      new QRCode(box, {
-        text: qrText,
-        width: 148,
-        height: 148,
-        colorDark: '#1a1612',
-        colorLight: '#ffffff',
-        correctLevel: QRCode.CorrectLevel.M
-      });
-    } catch(e) {
-      box.innerHTML = '<div style="width:148px;height:148px;display:flex;align-items:center;justify-content:center;font-size:.7rem;color:var(--ink3);text-align:center">QR ไม่พร้อมใช้งาน</div>';
-    }
-  }, 300);
+    const qrText = encodeURIComponent(`${sale.billNo}|${sale.customer}|฿${sale.total.toFixed(2)}|${sale.payType}|${sale.date}`);
+    box.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=148x148&data=${qrText}" width="148" height="148" style="border-radius:6px" onerror="this.parentNode.innerHTML='<div style=\'width:148px;height:148px;display:flex;align-items:center;justify-content:center;font-size:.7rem;color:#888;text-align:center\'>QR ไม่พร้อมใช้งาน</div>'">`;
+  }, 100);
 }
 
 function closeRcpt(e){if(!e||e.target===document.getElementById('rcptmovl'))document.getElementById('rcptmovl').classList.remove('show');}
