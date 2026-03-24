@@ -409,7 +409,7 @@ const MEM={}; // price memory: "CODE-VAR"->price
 // selT: 2=2หลัก, 3=3หลัก, '1a'=1หลัก(R2ล่าง), '1b'=1หลัก(R3บน)
 const V1A=[{v:'R2ล่าง',c:'r2s'}]; // 1 หลัก แบบ R2ล่าง
 const V1B=[{v:'R3บน', c:'r3s'}]; // 1 หลัก แบบ R3บน
-const V2=[{v:'O',c:'o'},{v:'U',c:'u'},{v:'OU',c:'ou',combo:['O','U']},{v:'B',c:'b',pair:true}];
+const V2=[{v:'O',c:'o',label:'บน'},{v:'U',c:'u',label:'ล่าง'},{v:'OU',c:'ou',combo:['O','U'],label:'บน+ล่าง'},{v:'B',c:'b',pair:true,label:'กลับ'}];
 const V3=[
   {v:'D',  c:'d'},
   {v:'R',  c:'r'},
@@ -563,8 +563,8 @@ function goS4(){
     else if(vt.v==='3DF') desc=`(3 ตรงหน้า)`;
     else                desc=``;
     return `<button class="vbtn ${vt.c}" id="vb${vt.v}" onclick="pickV('${vt.v}')">
-      <span class="vletter" style="font-size:${vt.v.length>2?'.85rem':'1.1rem'}">${vt.v}</span>
-      <span class="vdesc">แบบ ${vt.v}${desc?'<br>'+desc:''}</span>
+      <span class="vletter" style="font-size:${(vt.label||vt.v).length>3?'.75rem':vt.v.length>2?'.85rem':'1.1rem'}">${vt.label||vt.v}</span>
+      <span class="vdesc">${desc||('แบบ '+(vt.label||vt.v))}</span>
     </button>`;
   }).join('');
   selV=null;
@@ -594,7 +594,8 @@ function pickV(v){
 
   const pad=curCode.padStart(digitCount(),'0');
   document.getElementById('pfc').textContent=pad;
-  document.getElementById('pfv').textContent=v;
+  const vDef = varList().find(x=>x.v===v);
+  document.getElementById('pfv').textContent=(vDef?.label||v);
 
   const combo=comboOf(v);
   const pair=isPair(v);
