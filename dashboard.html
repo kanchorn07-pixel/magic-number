@@ -397,7 +397,7 @@ body::before {
 #login-btn:hover{opacity:.88}
 #login-btn:disabled{opacity:.5;cursor:not-allowed}
 #login-err{color:#e74c3c;font-size:.8rem;text-align:center;margin-top:10px;min-height:18px}
-#login-user-badge{position:fixed;top:12px;right:16px;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-size:.78rem;display:flex;align-items:center;gap:8px;cursor:pointer}
+#login-user-badge{position:fixed;bottom:16px;right:16px;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-size:.78rem;display:flex;align-items:center;gap:8px;cursor:pointer}
 #login-user-badge:hover{border-color:var(--gold)}
 
 </style>
@@ -959,9 +959,7 @@ function filterSales(from, to) {
 }
 
 function fmtMoney(n) {
-  if (n >= 1000000) return '฿' + (n/1000000).toFixed(1) + 'M';
-  if (n >= 1000) return '฿' + (n/1000).toFixed(1) + 'K';
-  return '฿' + n.toFixed(0);
+  return '฿' + n.toLocaleString('th-TH', {minimumFractionDigits:2, maximumFractionDigits:2});
 }
 
 function fmtDate(d) { return d.toLocaleDateString('th-TH', { month:'short', day:'numeric' }); }
@@ -1815,6 +1813,13 @@ async function checkLogin(){
   ov.style.display='flex';
 }
 
+function togglePass(){
+  const inp = document.getElementById('login-pass');
+  const btn = document.getElementById('eye-btn');
+  if(inp.type==='password'){ inp.type='text'; btn.textContent='🙈'; }
+  else{ inp.type='password'; btn.textContent='👁️'; }
+}
+
 async function doLogin(){
   const username = document.getElementById('login-user').value.trim().toLowerCase();
   const password = document.getElementById('login-pass').value;
@@ -1828,7 +1833,15 @@ async function doLogin(){
     if(!data){ errEl.textContent='ไม่พบผู้ใช้งานนี้'; btn.disabled=false; return; }
     if(data.password !== password){ errEl.textContent='รหัสผ่านไม่ถูกต้อง'; btn.disabled=false; return; }
     if(!ALLOWED_ROLES_DASH.includes(data.role)){
-      errEl.textContent='บัญชีนี้ไม่มีสิทธิ์เข้า Dashboard';
+      if(data.role==='seller'){
+        // ผู้ขาย → redirect ไปหน้าระบบขาย
+        const session = {username, role:data.role, name:data.name||username};
+        sessionStorage.setItem('mn_session', JSON.stringify(session));
+        errEl.textContent='กำลังพาไปหน้าระบบขาย...';
+        setTimeout(()=>{ window.location.href='sales_program_v3.html'; }, 800);
+      } else {
+        errEl.textContent='บัญชีนี้ไม่มีสิทธิ์เข้า Dashboard';
+      }
       btn.disabled=false; return;
     }
     const session = {username, role:data.role, name:data.name||username};
@@ -1873,7 +1886,13 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
     <div class="login-field">
       <label>รหัสผ่าน</label>
-      <input type="password" id="login-pass" placeholder="password" onkeydown="if(event.key==='Enter')doLogin()">
+      <div style="position:relative">
+        <input type="password" id="login-pass" placeholder="password" onkeydown="if(event.key==='Enter')doLogin()" style="padding-right:44px">
+        <button type="button" onclick="togglePass()" id="eye-btn"
+          style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text3);font-size:1.1rem;padding:0;line-height:1">
+          👁️
+        </button>
+      </div>
     </div>
     <button id="login-btn" onclick="doLogin()">เข้าสู่ระบบ</button>
     <div id="login-err"></div>

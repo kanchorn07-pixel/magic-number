@@ -1070,6 +1070,13 @@ async function checkLogin(){
   document.getElementById('login-overlay').style.display='flex';
 }
 
+function togglePass(){
+  const inp = document.getElementById('login-pass');
+  const btn = document.getElementById('eye-btn');
+  if(inp.type==='password'){ inp.type='text'; btn.textContent='🙈'; }
+  else{ inp.type='password'; btn.textContent='👁️'; }
+}
+
 async function doLogin(){
   const username = document.getElementById('login-user').value.trim().toLowerCase();
   const password = document.getElementById('login-pass').value;
@@ -1083,7 +1090,14 @@ async function doLogin(){
     if(!data){ errEl.textContent='ไม่พบผู้ใช้งานนี้'; btn.disabled=false; return; }
     if(data.password !== password){ errEl.textContent='รหัสผ่านไม่ถูกต้อง'; btn.disabled=false; return; }
     if(!ALLOWED_ROLES_SALES.includes(data.role)){
-      errEl.textContent='บัญชีนี้ไม่มีสิทธิ์เข้าระบบขาย';
+      if(data.role==='manager'||data.role==='admin'){
+        const session = {username, role:data.role, name:data.name||username};
+        sessionStorage.setItem('mn_session', JSON.stringify(session));
+        errEl.textContent='กำลังพาไปหน้า Dashboard...';
+        setTimeout(()=>{ window.location.href='dashboard.html'; }, 800);
+      } else {
+        errEl.textContent='บัญชีนี้ไม่มีสิทธิ์เข้าระบบขาย';
+      }
       btn.disabled=false; return;
     }
     const session = {username, role:data.role, name:data.name||username};
@@ -1125,7 +1139,13 @@ checkLogin();
     </div>
     <div class="login-field">
       <label>รหัสผ่าน</label>
-      <input type="password" id="login-pass" placeholder="password" onkeydown="if(event.key==='Enter')doLogin()">
+      <div style="position:relative">
+        <input type="password" id="login-pass" placeholder="password" onkeydown="if(event.key==='Enter')doLogin()" style="padding-right:44px">
+        <button type="button" onclick="togglePass()" id="eye-btn"
+          style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--ink2,#aaa);font-size:1.1rem;padding:0;line-height:1">
+          👁️
+        </button>
+      </div>
     </div>
     <button id="login-btn" onclick="doLogin()">เข้าสู่ระบบ</button>
     <div id="login-err"></div>
