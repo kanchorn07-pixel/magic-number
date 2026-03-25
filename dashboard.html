@@ -1698,7 +1698,7 @@ function renderRwResult(session) {
       </div>
       <div class="kpi-card ${grandDiff>=0?'green':'red'}">
         <div class="kpi-label">ส่วนต่าง (ยอด−รางวัล)</div>
-        <div class="kpi-val" style="color:${grandColor}">${diffFmt}</div>
+        <div class="kpi-val" style="color:${diffColor}">${diffFmt}</div>
       </div>
     </div>
     <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:16px">
@@ -1725,6 +1725,7 @@ function renderRwResult(session) {
         </tbody>
       </table></div>
     </div>`;
+}
 
 function rwSetBonus(cust, val) { custBonus[cust] = parseFloat(val)||0; rwCalc(); }
 
