@@ -871,10 +871,16 @@ async function fetchFromFirebase() {
   try {
     const res  = await fetch(FB_URL + '/sales_data.json');
     const data = await res.json();
-    if (Array.isArray(data) && data.length > 0) {
-      return data.map(s => ({...s, dateObj: new Date(s.dateObj)}));
+    let arr = [];
+    if (Array.isArray(data)) {
+      arr = data.filter(s => s !== null && s !== undefined);
+    } else if (data && typeof data === 'object') {
+      arr = Object.values(data).filter(s => s !== null && s !== undefined);
     }
-  } catch(e) {}
+    if (arr.length > 0) {
+      return arr.map(s => ({...s, dateObj: new Date(s.dateObj)}));
+    }
+  } catch(e) { console.error('fetchFromFirebase error:', e); }
   return null;
 }
 
