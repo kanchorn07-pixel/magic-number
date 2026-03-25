@@ -1,0 +1,1931 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard ผู้บริหาร</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0b0f1a;
+  --surface: #111827;
+  --surface2: #1c2436;
+  --surface3: #242d3f;
+  --border: #2a3550;
+  --text: #e2e8f4;
+  --text2: #8896b0;
+  --text3: #5a6a82;
+  --blue: #3b82f6;
+  --green: #10b981;
+  --gold: #f59e0b;
+  --red: #ef4444;
+  --purple: #8b5cf6;
+  --cyan: #06b6d4;
+  --shadow: rgba(0,0,0,0.3);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: 'Sarabun', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* GRID BG */
+body::before {
+  content:'';
+  position:fixed; inset:0;
+  background-image:
+    linear-gradient(rgba(59,130,246,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(59,130,246,0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events:none; z-index:0;
+}
+
+.app { position:relative; z-index:1; display:flex; min-height:100vh; }
+
+/* SIDEBAR */
+.sidebar {
+  width: 220px;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  padding: 24px 0;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-logo {
+  padding: 0 20px 24px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 16px;
+}
+
+.sidebar-logo .logo-icon { font-size: 1.4rem; margin-bottom: 6px; display: block; }
+.sidebar-logo h2 { font-size: 0.9rem; font-weight: 700; letter-spacing: 0.5px; }
+.sidebar-logo p { font-size: 0.7rem; color: var(--text3); font-family: 'JetBrains Mono', monospace; }
+
+.nav-label {
+  padding: 6px 20px 4px;
+  font-size: 0.62rem;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.nav-btn {
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 10px 20px;
+  text-align: left;
+  cursor: pointer;
+  color: var(--text2);
+  font-family: 'Sarabun', sans-serif;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.15s;
+  border-left: 3px solid transparent;
+}
+
+.nav-btn:hover { background: var(--surface2); color: var(--text); }
+.nav-btn.active { background: rgba(59,130,246,0.1); color: var(--blue); border-left-color: var(--blue); }
+
+.nav-btn .icon { font-size: 1rem; width: 20px; text-align: center; }
+
+.sidebar-footer {
+  margin-top: auto;
+  padding: 16px 20px;
+  border-top: 1px solid var(--border);
+  font-size: 0.72rem;
+  color: var(--text3);
+  font-family: 'JetBrains Mono', monospace;
+  line-height: 1.8;
+}
+
+/* MAIN CONTENT */
+.main {
+  flex: 1;
+  overflow-y: auto;
+  padding: 28px 28px 40px;
+}
+
+.page { display: none; }
+.page.active { display: block; animation: fadeIn 0.2s ease; }
+
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+
+/* PAGE HEADER */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.page-title { font-size: 1.3rem; font-weight: 700; }
+.page-sub { font-size: 0.75rem; color: var(--text3); font-family: 'JetBrains Mono', monospace; margin-top: 2px; }
+
+/* FILTER PILLS */
+.filter-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.filter-pill {
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-family: 'Sarabun', sans-serif;
+  font-size: 0.8rem;
+  cursor: pointer;
+  color: var(--text2);
+  transition: all 0.15s;
+}
+
+.filter-pill:hover { border-color: var(--blue); color: var(--blue); }
+.filter-pill.active { background: rgba(59,130,246,0.15); border-color: var(--blue); color: var(--blue); font-weight: 700; }
+
+/* DATE RANGE */
+.date-range-row {
+  display: none;
+  gap: 10px;
+  align-items: center;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.date-range-row.show { display: flex; }
+
+.date-input {
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.82rem;
+  color: var(--text);
+  font-family: 'Sarabun', sans-serif;
+}
+
+.date-input:focus { outline: none; border-color: var(--blue); }
+
+.btn-apply {
+  background: var(--blue);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-family: 'Sarabun', sans-serif;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-apply:hover { background: #2563eb; }
+
+/* KPI GRID */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 900px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+
+.kpi-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px 20px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+.kpi-card::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+}
+
+.kpi-card.blue::after  { background: var(--blue); }
+.kpi-card.green::after { background: var(--green); }
+.kpi-card.gold::after  { background: var(--gold); }
+.kpi-card.purple::after{ background: var(--purple); }
+
+.kpi-label { font-size: 0.68rem; color: var(--text3); text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 8px; }
+.kpi-val   { font-family: 'JetBrains Mono', monospace; font-size: 1.6rem; font-weight: 700; line-height: 1; margin-bottom: 6px; }
+.kpi-sub   { font-size: 0.72rem; color: var(--text3); }
+
+.kpi-card.blue .kpi-val  { color: var(--blue); }
+.kpi-card.green .kpi-val { color: var(--green); }
+.kpi-card.gold .kpi-val  { color: var(--gold); }
+.kpi-card.purple .kpi-val{ color: var(--purple); }
+
+/* GRID 2 COLS */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+.three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 16px; }
+
+@media (max-width: 800px) {
+  .two-col, .three-col { grid-template-columns: 1fr; }
+}
+
+/* CARD */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.card-head {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.card-head h3 { font-size: 0.82rem; font-weight: 700; letter-spacing: 0.3px; }
+.card-head span { font-size: 0.7rem; color: var(--text3); font-family: 'JetBrains Mono', monospace; }
+
+.card-body { padding: 16px 18px; }
+
+/* BAR CHART */
+.bar-chart { display: flex; flex-direction: column; gap: 10px; }
+
+.bar-row { display: flex; align-items: center; gap: 10px; }
+.bar-label { font-size: 0.75rem; color: var(--text2); min-width: 80px; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bar-track { flex: 1; background: rgba(255,255,255,0.06); border-radius: 4px; height: 8px; overflow: hidden; }
+.bar-fill  { height: 100%; border-radius: 4px; transition: width 0.6s ease; }
+.bar-val   { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--text2); min-width: 70px; text-align: right; }
+
+/* DONUT CHART */
+.donut-wrap {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 8px 0;
+}
+
+.donut-svg { flex-shrink: 0; }
+.donut-legend { flex: 1; display: flex; flex-direction: column; gap: 10px; }
+.legend-item { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; }
+.legend-dot  { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.legend-pct  { margin-left: auto; font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 0.82rem; }
+
+/* BILL TABLE */
+.bill-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+.bill-table th {
+  background: var(--surface2);
+  padding: 9px 12px;
+  text-align: left;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 400;
+  border-bottom: 1px solid var(--border);
+}
+.bill-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(42,53,80,0.5);
+}
+.bill-table tr:last-child td { border-bottom: none; }
+.bill-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+.tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.tag-cash   { background: rgba(16,185,129,0.15); color: var(--green); }
+.tag-credit { background: rgba(59,130,246,0.15);  color: var(--blue); }
+
+/* EMPTY STATE */
+.empty-dash {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text3);
+  font-size: 0.85rem;
+}
+
+.empty-dash .ei { font-size: 2.5rem; margin-bottom: 12px; }
+
+/* MINI LINE CHART */
+.sparkline { display: flex; align-items: flex-end; gap: 4px; height: 48px; padding-top: 4px; }
+.spark-bar { flex: 1; border-radius: 3px 3px 0 0; min-width: 6px; transition: all 0.4s; cursor: default; }
+.spark-bar:hover { opacity: 0.8; }
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* BILL DETAIL MODAL */
+#bill-detail-modal { opacity:0; pointer-events:none; transition:opacity .2s; }
+#bill-detail-modal.show { opacity:1 !important; pointer-events:all !important; }
+#bill-detail-modal.show > div { transform:scale(1) !important; }
+
+/* SOFT BAR COLORS for product chart */
+.bar-soft-1  { background: #4e9bb5; }   /* muted teal-blue */
+.bar-soft-2  { background: #5aab8a; }   /* sage green */
+.bar-soft-3  { background: #7b8fd4; }   /* soft indigo */
+.bar-soft-4  { background: #b07fd4; }   /* dusty purple */
+.bar-soft-5  { background: #d4956a; }   /* warm sand */
+.bar-soft-6  { background: #6ab8c8; }   /* light teal */
+.bar-soft-7  { background: #8fc47a; }   /* soft lime */
+.bar-soft-8  { background: #c4a06a; }   /* muted amber */
+.bar-soft-9  { background: #a07ab8; }   /* mauve */
+.bar-soft-10 { background: #6a9dc4; }   /* steel blue */
+.rw-input {
+  background: var(--surface3); border: 1px solid var(--border); border-radius: 6px;
+  padding: 7px 10px; font-family: 'JetBrains Mono', monospace; font-size: .85rem;
+  color: var(--text); width: 100%; transition: border-color .15s;
+}
+.rw-input:focus { outline: none; border-color: var(--gold); }
+.rw-input::placeholder { color: var(--text3); }
+.rw-lbl { font-size: .62rem; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+.rw-preview { font-size: .7rem; color: var(--text3); font-family: 'JetBrains Mono', monospace; margin-top: 6px; min-height: 16px; }
+.rw-variant-block { padding: 4px 0; }
+.rw-variant-header { display: flex; align-items: center; gap: 8px; }
+.rw-vbadge { font-family: 'JetBrains Mono', monospace; font-size: 1rem; font-weight: 700; padding: 3px 12px; border-radius: 6px; }
+.rw-tab { background: var(--surface2); border: 1.5px solid var(--border); border-radius: 20px; padding: 5px 14px; font-size: .78rem; cursor: pointer; color: var(--text2); font-family: 'Sarabun', sans-serif; transition: all .15s; }
+.rw-tab:hover { border-color: var(--gold); color: var(--gold); }
+.rw-tab.active { background: rgba(245,158,11,.15); border-color: var(--gold); color: var(--gold); font-weight: 700; }
+.bonus-input { width: 90px; background: var(--surface3); border: 1px solid rgba(245,158,11,.3); border-radius: 6px; padding: 5px 8px; font-family: 'JetBrains Mono', monospace; font-size: .8rem; color: var(--gold); text-align: right; }
+.bonus-input:focus { outline: none; border-color: var(--gold); }
+
+/* DATETIME */
+#dash-datetime { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--text3); }
+
+/* RESPONSIVE */
+@media (max-width: 600px) {
+  .sidebar { display: none; }
+  .main { padding: 16px; }
+  .kpi-grid { grid-template-columns: 1fr 1fr; }
+}
+
+/* ── LOGIN MODAL ─────────────────────────────────────────── */
+#login-overlay{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center}
+#login-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:36px 40px;width:100%;max-width:380px;box-shadow:0 24px 60px rgba(0,0,0,.5)}
+#login-logo{text-align:center;font-size:2rem;margin-bottom:4px}
+#login-title{text-align:center;font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:4px}
+#login-sub{text-align:center;font-size:.75rem;color:var(--text3);margin-bottom:24px}
+.login-field{margin-bottom:14px}
+.login-field label{display:block;font-size:.75rem;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.8px}
+.login-field input{width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;padding:11px 14px;color:var(--text);font-size:.95rem;font-family:inherit;transition:border-color .15s;box-sizing:border-box}
+.login-field input:focus{outline:none;border-color:var(--gold)}
+#login-btn{width:100%;background:var(--gold);color:#1a1208;border:none;border-radius:8px;padding:13px;font-size:1rem;font-weight:700;cursor:pointer;margin-top:8px;transition:opacity .15s;font-family:inherit}
+#login-btn:hover{opacity:.88}
+#login-btn:disabled{opacity:.5;cursor:not-allowed}
+#login-err{color:#e74c3c;font-size:.8rem;text-align:center;margin-top:10px;min-height:18px}
+#login-user-badge{position:fixed;bottom:16px;right:16px;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-size:.78rem;display:flex;align-items:center;gap:8px;cursor:pointer}
+#login-user-badge:hover{border-color:var(--gold)}
+
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <span class="logo-icon">📊</span>
+      <h2>Dashboard</h2>
+      <!-- ชื่อผู้ใช้งานปัจจุบัน -->
+      <div id="sidebar-user" style="display:none;margin-top:10px;padding:8px 10px;background:var(--surface2);border-radius:8px;border:1px solid var(--border)">
+        <div style="display:flex;align-items:center;gap:7px">
+          <span id="sidebar-role-icon" style="font-size:1rem">👤</span>
+          <div>
+            <div id="sidebar-username" style="font-size:.82rem;font-weight:700;color:var(--text)">—</div>
+            <div id="sidebar-role-text" style="font-size:.65rem;color:var(--text3);font-family:'JetBrains Mono',monospace">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <span class="nav-label">รายงาน</span>
+    <button class="nav-btn active" onclick="showPage('overview')">
+      <span class="icon">🏠</span> ภาพรวม
+    </button>
+    <button class="nav-btn" onclick="showPage('sales')">
+      <span class="icon">📈</span> ยอดขาย
+    </button>
+    <button class="nav-btn" onclick="showPage('customers')">
+      <span class="icon">👥</span> ลูกค้า
+    </button>
+    <button class="nav-btn" onclick="showPage('products')">
+      <span class="icon">📦</span> สินค้า
+    </button>
+    <button class="nav-btn" onclick="showPage('payment')">
+      <span class="icon">💳</span> การชำระเงิน
+    </button>
+    <button class="nav-btn" onclick="showPage('reward')">
+      <span class="icon">🎁</span> กิจกรรมรางวัล
+    </button>
+
+    <div class="sidebar-footer">
+      <div id="dash-datetime">—</div>
+      <div style="margin-top:4px;margin-bottom:10px">ระบบขายสินค้า v3</div>
+      <!-- ปุ่ม Logout -->
+      <button id="sidebar-logout" onclick="doLogout()" style="display:none;width:100%;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:8px;padding:9px;color:#f87171;font-family:'Sarabun',sans-serif;font-size:.82rem;cursor:pointer;transition:all .15s;text-align:center">
+        🚪 ออกจากระบบ
+      </button>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- =========================================================
+         PAGE: OVERVIEW
+    ========================================================= -->
+    <div class="page active" id="page-overview">
+      <div class="page-header">
+        <div>
+          <div class="page-title">ภาพรวม</div>
+          <div class="page-sub" id="ov-period">—</div>
+        </div>
+        <div>
+          <div class="filter-row">
+            <button class="filter-pill active" id="ov-today"  onclick="setOverviewPeriod('today')">วันนี้</button>
+            <button class="filter-pill"        id="ov-week"   onclick="setOverviewPeriod('week')">สัปดาห์นี้</button>
+            <button class="filter-pill"        id="ov-month"  onclick="setOverviewPeriod('month')">เดือนนี้</button>
+            <button class="filter-pill"        id="ov-custom" onclick="setOverviewPeriod('custom')">กำหนดเอง</button>
+          </div>
+          <div class="date-range-row" id="ov-range-row">
+            <input type="date" id="ov-from" class="date-input" oninput="renderOverview()">
+            <span style="color:var(--text3)">—</span>
+            <input type="date" id="ov-to"   class="date-input" oninput="renderOverview()">
+            <button class="btn-apply" onclick="renderOverview()">แสดง</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- KPI ROW -->
+      <div class="kpi-grid" id="ov-kpi">
+        <div class="kpi-card blue"><div class="kpi-label">ยอดขายรวม</div><div class="kpi-val" id="ov-total">฿0</div><div class="kpi-sub" id="ov-total-sub">—</div></div>
+        <div class="kpi-card green"><div class="kpi-label">จำนวนบิล</div><div class="kpi-val" id="ov-bills">0</div><div class="kpi-sub" id="ov-bills-sub">—</div></div>
+        <div class="kpi-card gold"><div class="kpi-label">เฉลี่ย/บิล</div><div class="kpi-val" id="ov-avg">฿0</div><div class="kpi-sub">บาท/บิล</div></div>
+        <div class="kpi-card purple"><div class="kpi-label">ชิ้นรวม</div><div class="kpi-val" id="ov-qty">0</div><div class="kpi-sub">ชิ้น</div></div>
+      </div>
+
+      <div class="two-col">
+        <!-- CASH vs CREDIT -->
+        <div class="card">
+          <div class="card-head"><h3>💳 วิธีชำระเงิน</h3><span id="pay-ratio-sub">—</span></div>
+          <div class="card-body">
+            <div class="donut-wrap" id="donut-wrap">
+              <div class="empty-dash"><div class="ei">💳</div>ยังไม่มีข้อมูล</div>
+            </div>
+          </div>
+        </div>
+        <!-- TOP CUSTOMERS -->
+        <div class="card">
+          <div class="card-head"><h3>🏆 ลูกค้าสูงสุด</h3><span>Top 5</span></div>
+          <div class="card-body">
+            <div class="bar-chart" id="ov-top-cust">
+              <div class="empty-dash" style="padding:16px"><div class="ei">👥</div>ยังไม่มีข้อมูล</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RECENT BILLS -->
+      <div class="card">
+        <div class="card-head"><h3>📋 บิลล่าสุด</h3><span id="ov-bill-count">0 บิล</span></div>
+        <div style="overflow-x:auto">
+          <div id="ov-bill-table"><div class="empty-dash"><div class="ei">📋</div>ยังไม่มีข้อมูล</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- =========================================================
+         PAGE: SALES
+    ========================================================= -->
+    <div class="page" id="page-sales">
+      <div class="page-header">
+        <div>
+          <div class="page-title">ยอดขายตามช่วงเวลา</div>
+          <div class="page-sub">วิเคราะห์แนวโน้มการขาย</div>
+        </div>
+        <div>
+          <div class="filter-row">
+            <button class="filter-pill active" id="sl-today"  onclick="setSalesPeriod('today')">วันนี้</button>
+            <button class="filter-pill"        id="sl-week"   onclick="setSalesPeriod('week')">สัปดาห์นี้</button>
+            <button class="filter-pill"        id="sl-month"  onclick="setSalesPeriod('month')">เดือนนี้</button>
+            <button class="filter-pill"        id="sl-custom" onclick="setSalesPeriod('custom')">กำหนดเอง</button>
+          </div>
+          <div class="date-range-row" id="sl-range-row">
+            <input type="date" id="sl-from" class="date-input" oninput="renderSales()">
+            <span style="color:var(--text3)">—</span>
+            <input type="date" id="sl-to"   class="date-input" oninput="renderSales()">
+            <button class="btn-apply" onclick="renderSales()">แสดง</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi-card blue"><div class="kpi-label">ยอดรวม</div><div class="kpi-val" id="sl-total">฿0</div></div>
+        <div class="kpi-card green"><div class="kpi-label">บิลทั้งหมด</div><div class="kpi-val" id="sl-bills">0</div></div>
+        <div class="kpi-card gold"><div class="kpi-label">สูงสุด/บิล</div><div class="kpi-val" id="sl-max">฿0</div></div>
+        <div class="kpi-card purple"><div class="kpi-label">เฉลี่ย/บิล</div><div class="kpi-val" id="sl-avg">฿0</div></div>
+      </div>
+
+      <!-- SALES BY DAY SPARKLINE -->
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-head"><h3>📊 ยอดขายรายวัน</h3><span id="sl-chart-sub">—</span></div>
+        <div class="card-body">
+          <div id="sl-sparkline" style="display:flex;gap:6px;align-items:flex-end;height:80px;overflow-x:auto"></div>
+          <div id="sl-day-labels" style="display:flex;gap:6px;margin-top:6px;overflow-x:auto"></div>
+        </div>
+      </div>
+
+      <!-- ALL BILLS TABLE -->
+      <div class="card">
+        <div class="card-head"><h3>📋 รายการบิลทั้งหมด</h3><span id="sl-bill-count">0 รายการ</span></div>
+        <div style="overflow-x:auto;max-height:360px;overflow-y:auto">
+          <div id="sl-bill-table"><div class="empty-dash"><div class="ei">📋</div>ยังไม่มีข้อมูล</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- =========================================================
+         PAGE: CUSTOMERS
+    ========================================================= -->
+    <div class="page" id="page-customers">
+      <div class="page-header">
+        <div>
+          <div class="page-title">วิเคราะห์ลูกค้า</div>
+          <div class="page-sub">ยอดซื้อ / ความถี่ / ประวัติ</div>
+        </div>
+        <div class="filter-row">
+          <button class="filter-pill active" id="cu-today"  onclick="setCustPeriod('today')">วันนี้</button>
+          <button class="filter-pill"        id="cu-week"   onclick="setCustPeriod('week')">สัปดาห์</button>
+          <button class="filter-pill"        id="cu-month"  onclick="setCustPeriod('month')">เดือน</button>
+          <button class="filter-pill"        id="cu-all"    onclick="setCustPeriod('all')">ทั้งหมด</button>
+        </div>
+      </div>
+
+      <div id="cust-grid" class="three-col">
+        <div class="empty-dash" style="grid-column:1/-1"><div class="ei">👥</div>ยังไม่มีข้อมูลลูกค้า</div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h3>📊 ยอดซื้อรวมต่อลูกค้า</h3><span id="cust-bar-count">—</span></div>
+        <div class="card-body">
+          <div class="bar-chart" id="cust-bar">
+            <div class="empty-dash" style="padding:16px"><div class="ei">👥</div>ยังไม่มีข้อมูล</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- =========================================================
+         PAGE: PRODUCTS
+    ========================================================= -->
+    <div class="page" id="page-products">
+      <div class="page-header">
+        <div>
+          <div class="page-title">วิเคราะห์สินค้า</div>
+          <div class="page-sub">ยอดขายตามรหัส / แบบ O-U</div>
+        </div>
+        <div class="filter-row">
+          <button class="filter-pill active" id="pr-today"  onclick="setProdPeriod('today')">วันนี้</button>
+          <button class="filter-pill"        id="pr-week"   onclick="setProdPeriod('week')">สัปดาห์</button>
+          <button class="filter-pill"        id="pr-month"  onclick="setProdPeriod('month')">เดือน</button>
+          <button class="filter-pill"        id="pr-all"    onclick="setProdPeriod('all')">ทั้งหมด</button>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="card">
+          <div class="card-head"><h3>🔵 แบบ O vs แบบ U</h3><span>ชิ้น / ยอด</span></div>
+          <div class="card-body" id="ou-compare">
+            <div class="empty-dash"><div class="ei">📦</div>ยังไม่มีข้อมูล</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>🔢 2 หลัก vs 3 หลัก</h3><span>ประเภทรหัส</span></div>
+          <div class="card-body" id="digit-compare">
+            <div class="empty-dash"><div class="ei">🔢</div>ยังไม่มีข้อมูล</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h3>📦 รหัสสินค้าขายดี</h3><span id="prod-bar-sub">Top 10</span></div>
+        <div class="card-body">
+          <div class="bar-chart" id="prod-bar">
+            <div class="empty-dash" style="padding:16px"><div class="ei">📦</div>ยังไม่มีข้อมูล</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- =========================================================
+         PAGE: PAYMENT
+    ========================================================= -->
+    <div class="page" id="page-payment">
+      <div class="page-header">
+        <div>
+          <div class="page-title">การชำระเงิน</div>
+          <div class="page-sub">Cash vs Credit / โอน</div>
+        </div>
+        <div class="filter-row">
+          <button class="filter-pill active" id="pm-today"  onclick="setPayPeriod('today')">วันนี้</button>
+          <button class="filter-pill"        id="pm-week"   onclick="setPayPeriod('week')">สัปดาห์</button>
+          <button class="filter-pill"        id="pm-month"  onclick="setPayPeriod('month')">เดือน</button>
+          <button class="filter-pill"        id="pm-all"    onclick="setPayPeriod('all')">ทั้งหมด</button>
+        </div>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi-card green"><div class="kpi-label">💵 Cash รวม</div><div class="kpi-val" id="pm-cash-total">฿0</div><div class="kpi-sub" id="pm-cash-cnt">0 บิล</div></div>
+        <div class="kpi-card blue"><div class="kpi-label">💳 Credit รวม</div><div class="kpi-val" id="pm-credit-total">฿0</div><div class="kpi-sub" id="pm-credit-cnt">0 บิล</div></div>
+        <div class="kpi-card gold"><div class="kpi-label">สัดส่วน Cash</div><div class="kpi-val" id="pm-cash-pct">0%</div></div>
+        <div class="kpi-card purple"><div class="kpi-label">สัดส่วน Credit</div><div class="kpi-val" id="pm-credit-pct">0%</div></div>
+      </div>
+
+      <div class="two-col">
+        <div class="card">
+          <div class="card-head"><h3>💵 รายการ Cash</h3><span id="pm-cash-list-cnt">—</span></div>
+          <div style="max-height:320px;overflow-y:auto">
+            <div id="pm-cash-list"><div class="empty-dash"><div class="ei">💵</div>ไม่มีรายการ</div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>💳 รายการ Credit</h3><span id="pm-credit-list-cnt">—</span></div>
+          <div style="max-height:320px;overflow-y:auto">
+            <div id="pm-credit-list"><div class="empty-dash"><div class="ei">💳</div>ไม่มีรายการ</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- =========================================================
+         PAGE: REWARD ACTIVITY
+    ========================================================= -->
+    <div class="page" id="page-reward">
+      <div class="page-header">
+        <div>
+          <div class="page-title">🎁 กิจกรรมรางวัล</div>
+          <div class="page-sub">กรอกเลขโดนใจ → กำหนดมูลค่ารางวัล → คำนวณ</div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <button onclick="rwOpenRewardConfig()" style="background:var(--surface2);color:var(--cyan);border:1px solid var(--cyan);border-radius:8px;padding:9px 18px;font-family:'Sarabun',sans-serif;font-size:.85rem;cursor:pointer">⚙️ กำหนดมูลค่ารางวัล</button>
+          <button id="rw-export-btn" onclick="rwExportPDF()" style="display:none;background:var(--surface2);color:var(--text2);border:1px solid var(--border);border-radius:8px;padding:9px 18px;font-family:'Sarabun',sans-serif;font-size:.85rem;cursor:pointer">📄 ส่งออก PDF</button>
+          <button id="rw-calc-btn" onclick="rwCalc()" disabled style="background:var(--surface3);color:var(--text3);border:none;border-radius:8px;padding:10px 22px;font-family:'Sarabun',sans-serif;font-size:.9rem;font-weight:700;cursor:not-allowed;transition:all .2s">✨ คำนวณรางวัล</button>
+        </div>
+      </div>
+
+      <!-- เลขโดนใจหน้าหลัก -->
+      <div style="display:grid;grid-template-columns:3fr 1fr;gap:14px;margin-bottom:14px">
+
+        <!-- 3 หลัก -->
+        <div class="card">
+          <div class="card-head" style="border-bottom:2px solid rgba(139,92,246,.4)">
+            <h3 style="color:var(--purple)">🟣 เลขโดนใจ 3 หลัก</h3>
+            <span style="font-size:.7rem;color:var(--text3)">D · 3DF(×2) · 3DU(×2)</span>
+          </div>
+          <div class="card-body" style="padding:14px">
+            <!-- D -->
+            <div style="margin-bottom:14px">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+                <span style="background:rgba(139,92,246,.15);color:var(--purple);font-family:'JetBrains Mono',monospace;font-weight:700;padding:3px 10px;border-radius:6px;font-size:.85rem">D</span>
+                <span style="font-size:.8rem;color:var(--text2)">3 ตัวบน (ตรง)</span>
+              </div>
+              <input class="rw-input" type="text" inputmode="numeric" id="ri-D-code" maxlength="3" placeholder="000–999" style="font-size:1.4rem;font-weight:700;text-align:center;letter-spacing:6px;color:var(--purple)" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,3);rwFieldChanged()">
+            </div>
+            <div style="height:1px;background:var(--border);margin-bottom:14px"></div>
+            <!-- 3DF -->
+            <div style="margin-bottom:14px">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+                <span style="background:rgba(16,185,129,.15);color:#10b981;font-family:'JetBrains Mono',monospace;font-weight:700;padding:3px 10px;border-radius:6px;font-size:.85rem">3DF</span>
+                <span style="font-size:.8rem;color:var(--text2)">3 ตัวหน้า (2 รางวัล)</span>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+                <div><div class="rw-lbl">รางวัลที่ 1</div><input class="rw-input" type="text" inputmode="numeric" id="ri-3DF-code1" maxlength="3" placeholder="000–999" style="text-align:center;color:#10b981;font-weight:700;font-size:1.1rem" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,3);rwFieldChanged()"></div>
+                <div><div class="rw-lbl">รางวัลที่ 2</div><input class="rw-input" type="text" inputmode="numeric" id="ri-3DF-code2" maxlength="3" placeholder="000–999" style="text-align:center;color:#10b981;font-weight:700;font-size:1.1rem" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,3);rwFieldChanged()"></div>
+              </div>
+            </div>
+            <div style="height:1px;background:var(--border);margin-bottom:14px"></div>
+            <!-- 3DU -->
+            <div>
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+                <span style="background:rgba(6,182,212,.15);color:#06b6d4;font-family:'JetBrains Mono',monospace;font-weight:700;padding:3px 10px;border-radius:6px;font-size:.85rem">3DU</span>
+                <span style="font-size:.8rem;color:var(--text2)">3 ตัวล่าง (2 รางวัล)</span>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+                <div><div class="rw-lbl">รางวัลที่ 1</div><input class="rw-input" type="text" inputmode="numeric" id="ri-3DU-code1" maxlength="3" placeholder="000–999" style="text-align:center;color:#06b6d4;font-weight:700;font-size:1.1rem" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,3);rwFieldChanged()"></div>
+                <div><div class="rw-lbl">รางวัลที่ 2</div><input class="rw-input" type="text" inputmode="numeric" id="ri-3DU-code2" maxlength="3" placeholder="000–999" style="text-align:center;color:#06b6d4;font-weight:700;font-size:1.1rem" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,3);rwFieldChanged()"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2 หลัก -->
+        <div class="card">
+          <div class="card-head" style="border-bottom:2px solid rgba(245,158,11,.4)">
+            <h3 style="color:var(--gold)">🟡 เลขโดนใจ 2 หลัก</h3>
+            <span style="font-size:.7rem;color:var(--text3)">U</span>
+          </div>
+          <div class="card-body" style="padding:14px">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+              <span style="background:rgba(245,158,11,.15);color:var(--gold);font-family:'JetBrains Mono',monospace;font-weight:700;padding:3px 10px;border-radius:6px;font-size:.85rem">U</span>
+              <span style="font-size:.8rem;color:var(--text2)">2 ตัวล่าง</span>
+            </div>
+            <input class="rw-input" type="text" inputmode="numeric" id="ri-U-code" maxlength="2" placeholder="00–99" style="font-size:1.4rem;font-weight:700;text-align:center;letter-spacing:6px;color:var(--gold)" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,2);rwFieldChanged()">
+            <div style="margin-top:10px;font-size:.72rem;color:var(--text3);line-height:1.8">
+              ใช้เป็นฐานสำหรับ:<br>
+              • แบบ O → เลขท้าย 2 ตัวของ D<br>
+              • แบบ U → ตรงกับเลข U นี้<br>
+              • R2ล่าง → ตรงเลขใดใน U นี้
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Status + calc btn -->
+      <div id="rw-fill-status" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 16px;margin-bottom:16px;font-size:.8rem;color:var(--text3);display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <span>สถานะ:</span>
+        <span id="rw-status-D">⬜ D</span>
+        <span id="rw-status-U">⬜ U</span>
+        <span id="rw-fill-note" style="margin-left:auto;color:var(--text3)">กรอก D และ U ให้ครบก่อนคำนวณ</span>
+      </div>
+
+      <!-- SAVED RESULTS TABS -->
+      <div id="rw-results-wrap" style="display:none">
+        <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
+          <span style="font-size:.75rem;color:var(--text3);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px">ผลการคำนวณ:</span>
+          <div id="rw-tabs" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+          <button onclick="rwClearAll()" style="margin-left:auto;background:none;border:1px solid rgba(239,68,68,.3);color:var(--red);border-radius:6px;padding:4px 12px;font-size:.73rem;cursor:pointer;font-family:'Sarabun',sans-serif">ล้างทั้งหมด</button>
+        </div>
+        <div id="rw-result-content"></div>
+      </div>
+    </div>
+
+    <!-- REWARD CONFIG POPUP -->
+    <div id="rw-config-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(6px);z-index:9998;align-items:center;justify-content:center;padding:16px">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 50px rgba(0,0,0,.5)">
+        <div style="background:var(--surface2);border-bottom:1px solid var(--border);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0">
+          <div style="font-size:.9rem;font-weight:700;color:var(--cyan)">⚙️ กำหนดมูลค่ารางวัล</div>
+          <button onclick="rwCloseRewardConfig()" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:1.2rem">✕</button>
+        </div>
+        <div style="padding:18px 20px">
+
+          <!-- 1 หลัก -->
+          <div style="font-size:.7rem;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">แบบ 1 หลัก</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+            <div><div class="rw-lbl">R2ล่าง มูลค่ารางวัล (×)</div><input class="rw-input" type="text" inputmode="numeric" id="rv-R2L" placeholder="เช่น 4" style="text-align:center;color:#06b6d4;font-weight:700" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div>
+            <div><div class="rw-lbl">R3บน มูลค่ารางวัล (×)</div><input class="rw-input" type="text" inputmode="numeric" id="rv-R3B" placeholder="เช่น 4" style="text-align:center;color:#8b5cf6;font-weight:700" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div>
+          </div>
+
+          <div style="height:1px;background:var(--border);margin-bottom:14px"></div>
+
+          <!-- 2 หลัก -->
+          <div style="font-size:.7rem;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">แบบ 2 หลัก</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+            <div><div class="rw-lbl">O (2 ตัวบน) มูลค่ารางวัล (×)</div><input class="rw-input" type="text" inputmode="numeric" id="rv-O" placeholder="เช่น 80" style="text-align:center;color:var(--blue);font-weight:700" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div>
+            <div><div class="rw-lbl">U (2 ตัวล่าง) มูลค่ารางวัล (×)</div><input class="rw-input" type="text" inputmode="numeric" id="rv-U" placeholder="เช่น 80" style="text-align:center;color:var(--gold);font-weight:700" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div>
+          </div>
+
+          <div style="height:1px;background:var(--border);margin-bottom:14px"></div>
+
+          <!-- 3 หลัก -->
+          <div style="font-size:.7rem;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">แบบ 3 หลัก</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+            <div><div class="rw-lbl">D (ตรง) มูลค่ารางวัล (×)</div><input class="rw-input" type="text" inputmode="numeric" id="rv-D" placeholder="เช่น 500" style="text-align:center;color:var(--purple);font-weight:700" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div>
+            <div><div class="rw-lbl">R (โต๊ด) มูลค่ารางวัล (×)</div><input class="rw-input" type="text" inputmode="numeric" id="rv-R" placeholder="เช่น 100" style="text-align:center;color:var(--green);font-weight:700" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+            <div><div class="rw-lbl">3DU (3 ตัวล่าง) มูลค่ารางวัล (×)</div><input class="rw-input" type="text" inputmode="numeric" id="rv-3DU" placeholder="เช่น 100" style="text-align:center;color:#06b6d4;font-weight:700" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div>
+            <div><div class="rw-lbl">3DF (3 ตัวหน้า) มูลค่ารางวัล (×)</div><input class="rw-input" type="text" inputmode="numeric" id="rv-3DF" placeholder="เช่น 100" style="text-align:center;color:#10b981;font-weight:700" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div>
+          </div>
+
+          <div style="background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.2);border-radius:8px;padding:10px 14px;font-size:.75rem;color:var(--text3);line-height:1.9;margin-bottom:16px">
+            <b style="color:var(--gold)">⭐ Z(×3) และ 6D(×6)</b> — ลุ้นรางวัลอัตโนมัติตามเงื่อนไข ไม่ต้องกำหนดมูลค่าแยก
+          </div>
+
+          <button onclick="rwSaveConfig()" style="width:100%;background:var(--gold);color:#0b0f1a;border:none;border-radius:8px;padding:12px;font-family:'Sarabun',sans-serif;font-size:.95rem;font-weight:700;cursor:pointer">💾 บันทึกมูลค่ารางวัล</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end main -->
+</div><!-- end app -->
+
+<!-- BILL DETAIL MODAL -->
+<div id="bill-detail-modal"
+  style="position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(6px);z-index:9999;
+  display:flex;align-items:center;justify-content:center;padding:16px;"
+  onclick="if(event.target===this)this.classList.remove('show')">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;
+    width:100%;max-width:480px;max-height:85vh;overflow:hidden;
+    transform:scale(.96);transition:transform .22s;box-shadow:0 20px 50px rgba(0,0,0,.4);
+    display:flex;flex-direction:column">
+    <div style="background:var(--surface2);border-bottom:1px solid var(--border);
+      padding:15px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+      <div>
+        <div style="font-size:.85rem;font-weight:700;color:var(--text)">🧾 รายละเอียดบิล</div>
+        <div id="bill-detail-meta" style="font-size:.7rem;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-top:2px">—</div>
+      </div>
+      <button onclick="document.getElementById('bill-detail-modal').classList.remove('show')"
+        style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:1.2rem;padding:4px">✕</button>
+    </div>
+    <div id="bill-detail-body" style="padding:18px 20px;overflow-y:auto;flex:1"></div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// FIREBASE CONFIG — ใส่ค่าเดียวกับระบบขาย
+// ============================================================
+const FB_URL = 'https://magic-number-7b488-default-rtdb.asia-southeast1.firebasedatabase.app';
+
+async function fetchFromFirebase() {
+  try {
+    const res  = await fetch(FB_URL + '/sales_data.json');
+    const data = await res.json();
+    if (Array.isArray(data) && data.length > 0) {
+      return data.map(s => ({...s, dateObj: new Date(s.dateObj)}));
+    }
+  } catch(e) {}
+  return null;
+}
+
+function loadSales() {
+  // return current allSales (will be replaced after async fetch)
+  return (typeof allSales !== 'undefined' && allSales.length) ? allSales : [];
+}
+
+function generateDemoData() {
+  // สร้างข้อมูล demo ย้อนหลัง 30 วัน
+  const data = [];
+  const names = ['สมชาย', 'สมหญิง', 'สมศรี', 'อนุชา', 'กนกวรรณ', 'ธนพล', 'วิไลวรรณ', 'ประสิทธิ์'];
+  const codes2 = ['11','23','45','67','82'];
+  const codes3 = ['101','234','456','789','312'];
+  const variants = ['O','U'];
+  const payTypes = ['cash','credit'];
+  let billNo = 1;
+
+  for (let d = 30; d >= 0; d--) {
+    const date = new Date();
+    date.setDate(date.getDate() - d);
+    const dateObj = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const count = Math.floor(Math.random() * 6) + 1;
+    for (let b = 0; b < count; b++) {
+      const customer = names[Math.floor(Math.random() * names.length)];
+      const numItems = Math.floor(Math.random() * 4) + 1;
+      const items = [];
+      for (let i = 0; i < numItems; i++) {
+        const use3 = Math.random() > 0.5;
+        const code = use3 ? codes3[Math.floor(Math.random()*codes3.length)] : codes2[Math.floor(Math.random()*codes2.length)];
+        const variant = variants[Math.floor(Math.random()*2)];
+        const price = Math.round((Math.random() * 200 + 20) / 5) * 5;
+        const qty = Math.floor(Math.random() * 3) + 1;
+        const memKey = `${code}-${variant}`;
+        items.push({ code, variant, price, qty, memKey, key: memKey });
+      }
+      const total = items.reduce((s, i) => s + i.price * i.qty, 0);
+      data.push({
+        billNo: 'INV-' + String(billNo++).padStart(4,'0'),
+        customer,
+        payType: payTypes[Math.floor(Math.random()*2)],
+        date: dateObj.toLocaleDateString('th-TH', { year:'numeric', month:'long', day:'numeric' }),
+        time: `${String(Math.floor(Math.random()*12)+8).padStart(2,'0')}:${String(Math.floor(Math.random()*60)).padStart(2,'0')}`,
+        dateObj,
+        items,
+        total,
+      });
+    }
+  }
+  return data.reverse();
+}
+
+let allSales = [];
+
+// ============================================================
+// DATE UTILS
+// ============================================================
+function toVal(d) { return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+
+function getRange(mode) {
+  const today = new Date();
+  const t = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  if (mode === 'today') return { from: t, to: t };
+  if (mode === 'week') {
+    const day = today.getDay();
+    const mon = new Date(t); mon.setDate(t.getDate() - (day === 0 ? 6 : day - 1));
+    return { from: mon, to: t };
+  }
+  if (mode === 'month') return { from: new Date(today.getFullYear(), today.getMonth(), 1), to: t };
+  if (mode === 'all') {
+    if (!allSales.length) return { from: t, to: t };
+    const dates = allSales.map(s => s.dateObj.getTime());
+    return { from: new Date(Math.min(...dates)), to: new Date(Math.max(...dates)) };
+  }
+  return null;
+}
+
+function filterSales(from, to) {
+  if (!from || !to) return [];
+  return allSales.filter(s => s.dateObj >= from && s.dateObj <= to);
+}
+
+function fmtMoney(n) {
+  return '฿' + n.toLocaleString('th-TH', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+
+function fmtDate(d) { return d.toLocaleDateString('th-TH', { month:'short', day:'numeric' }); }
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+let currentPage = 'overview';
+
+function showPage(name) {
+  currentPage = name;
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  document.querySelector(`.nav-btn[onclick="showPage('${name}')"]`).classList.add('active');
+  if (name === 'overview')   renderOverview();
+  if (name === 'sales')      renderSales();
+  if (name === 'customers')  renderCustomers();
+  if (name === 'products')   renderProducts();
+  if (name === 'payment')    renderPayment();
+  if (name === 'reward')     initRewardPage();
+}
+
+// ============================================================
+// OVERVIEW PAGE
+// ============================================================
+let ovPeriod = 'today';
+
+function setOverviewPeriod(p) {
+  ovPeriod = p;
+  ['today','week','month','custom'].forEach(m => document.getElementById('ov-'+m).classList.toggle('active', m===p));
+  const row = document.getElementById('ov-range-row');
+  row.classList.toggle('show', p === 'custom');
+  if (p === 'custom') {
+    const t = toVal(new Date());
+    if (!document.getElementById('ov-to').value)   document.getElementById('ov-to').value = t;
+    if (!document.getElementById('ov-from').value) document.getElementById('ov-from').value = t;
+  }
+  renderOverview();
+}
+
+function getOvRange() {
+  if (ovPeriod !== 'custom') return getRange(ovPeriod);
+  const fv = document.getElementById('ov-from').value;
+  const tv = document.getElementById('ov-to').value;
+  if (!fv || !tv) return null;
+  const [fy,fm,fd] = fv.split('-').map(Number);
+  const [ty,tm,td] = tv.split('-').map(Number);
+  return { from: new Date(fy,fm-1,fd), to: new Date(ty,tm-1,td) };
+}
+
+function renderOverview() {
+  allSales = loadSales();
+  const range = getOvRange();
+  if (!range) return;
+  const sales = filterSales(range.from, range.to);
+
+  const total = sales.reduce((s,b) => s+b.total, 0);
+  const qty   = sales.reduce((s,b) => s+b.items.reduce((a,i) => a+i.qty, 0), 0);
+  const avg   = sales.length ? total/sales.length : 0;
+
+  document.getElementById('ov-period').textContent = fmtDate(range.from) + (range.from.getTime()===range.to.getTime() ? '' : ' — '+fmtDate(range.to));
+  document.getElementById('ov-total').textContent = fmtMoney(total);
+  document.getElementById('ov-total-sub').textContent = total.toLocaleString('th-TH', {minimumFractionDigits:2}) + ' บาท';
+  document.getElementById('ov-bills').textContent = sales.length;
+  document.getElementById('ov-bills-sub').textContent = 'บิล';
+  document.getElementById('ov-avg').textContent = fmtMoney(avg);
+  document.getElementById('ov-qty').textContent = qty;
+
+  // Cash vs Credit Donut
+  const cashSales   = sales.filter(s => s.payType === 'cash');
+  const creditSales = sales.filter(s => s.payType === 'credit');
+  const cashAmt   = cashSales.reduce((s,b) => s+b.total, 0);
+  const creditAmt = creditSales.reduce((s,b) => s+b.total, 0);
+  const totalAmt  = cashAmt + creditAmt || 1;
+  const cashPct   = Math.round(cashAmt/totalAmt*100);
+  const creditPct = 100 - cashPct;
+
+  document.getElementById('pay-ratio-sub').textContent = sales.length + ' บิล';
+  document.getElementById('donut-wrap').innerHTML = sales.length === 0
+    ? '<div class="empty-dash" style="width:100%"><div class="ei">💳</div>ยังไม่มีข้อมูล</div>'
+    : buildDonut([
+        { label:'Cash เงินสด', pct:cashPct, color:'#10b981', val:'฿'+cashAmt.toLocaleString('th-TH',{minimumFractionDigits:2}) },
+        { label:'Credit/โอน', pct:creditPct, color:'#3b82f6', val:'฿'+creditAmt.toLocaleString('th-TH',{minimumFractionDigits:2}) },
+      ]);
+
+  // Top customers bar
+  const custMap = {};
+  sales.forEach(s => { custMap[s.customer] = (custMap[s.customer]||0) + s.total; });
+  const custList = Object.entries(custMap).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const maxCust = custList[0] ? custList[0][1] : 1;
+  document.getElementById('ov-top-cust').innerHTML = custList.length === 0
+    ? '<div class="empty-dash" style="padding:16px"><div class="ei">👥</div>ยังไม่มีข้อมูล</div>'
+    : custList.map(([name,amt]) => `
+        <div class="bar-row">
+          <div class="bar-label">${name}</div>
+          <div class="bar-track"><div class="bar-fill" style="width:${(amt/maxCust*100).toFixed(1)}%;background:#4e9bb5;opacity:.85"></div></div>
+          <div class="bar-val">${fmtMoney(amt)}</div>
+        </div>`).join('');
+
+  // Bills table
+  document.getElementById('ov-bill-count').textContent = sales.length + ' บิล';
+  document.getElementById('ov-bill-table').innerHTML = sales.length === 0
+    ? '<div class="empty-dash"><div class="ei">📋</div>ยังไม่มีข้อมูล</div>'
+    : buildBillTable(sales.slice(0,20));
+}
+
+function buildDonut(segments) {
+  const r = 52, cx = 60, cy = 60, stroke = 18;
+  const circ = 2 * Math.PI * r;
+  let offset = 0;
+  const arcs = segments.map(seg => {
+    const dash = (seg.pct / 100) * circ;
+    const arc = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${seg.color}" stroke-width="${stroke}" stroke-dasharray="${dash} ${circ}" stroke-dashoffset="${-offset}" transform="rotate(-90 ${cx} ${cy})" opacity="0.9"/>`;
+    offset += dash;
+    return arc;
+  });
+
+  const svg = `<svg class="donut-svg" width="120" height="120" viewBox="0 0 120 120">
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--surface3)" stroke-width="${stroke}"/>
+    ${arcs.join('')}
+  </svg>`;
+
+  const legend = segments.map(seg => `
+    <div class="legend-item">
+      <span class="legend-dot" style="background:${seg.color}"></span>
+      <span style="color:var(--text2)">${seg.label}</span>
+      <span class="legend-pct" style="color:${seg.color}">${seg.pct}%</span>
+    </div>
+    <div style="font-size:0.72rem;color:var(--text3);padding-left:18px;margin-top:-4px">${seg.val}</div>
+  `).join('');
+
+  return `<div class="donut-wrap">${svg}<div class="donut-legend">${legend}</div></div>`;
+}
+
+function buildBillTable(bills) {
+  // Register bills for detail lookup
+  bills.forEach(s => { _billMap[s.billNo] = s; });
+  return `<table class="bill-table">
+    <thead><tr>
+      <th>เลขที่บิล</th><th>ลูกค้า</th><th>วันที่</th><th>เวลา</th><th>ชำระ</th><th style="text-align:right">ยอด</th>
+    </tr></thead>
+    <tbody>
+      ${bills.map(s => `<tr>
+        <td>
+          <span onclick="showBillDetail('${s.billNo}')"
+            style="font-family:'JetBrains Mono',monospace;color:var(--cyan);font-weight:700;cursor:pointer;
+            text-decoration:underline;text-underline-offset:3px;text-decoration-style:dotted"
+            title="คลิกดูรายละเอียด">${s.billNo}</span>
+        </td>
+        <td>
+          <span onclick="showBillDetail('${s.billNo}')"
+            style="font-weight:600;cursor:pointer;color:var(--text);border-bottom:1px dotted var(--text3)"
+            title="คลิกดูรายละเอียด">${s.customer}</span>
+        </td>
+        <td style="color:var(--text3);font-size:0.75rem">${s.date}</td>
+        <td style="font-family:'JetBrains Mono',monospace;color:var(--text3);font-size:0.75rem">${s.time}</td>
+        <td><span class="tag ${s.payType === 'cash' ? 'tag-cash' : 'tag-credit'}">${s.payType==='cash'?'Cash':'Credit'}</span></td>
+        <td style="text-align:right;font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--gold)">฿${s.total.toFixed(2)}</td>
+      </tr>`).join('')}
+    </tbody>
+  </table>`;
+}
+
+// Global bill lookup map — keyed by billNo
+const _billMap = {};
+
+function showBillDetail(billNo) {
+  // Ensure _billMap has latest data from allSales
+  allSales.forEach(s => { _billMap[s.billNo] = s; });
+  const s = _billMap[billNo];
+  if (!s) { console.warn('Bill not found:', billNo); return; }
+
+  const payLabel = s.payType === 'cash' ? '💵 เงินสด' : '💳 เครดิต/โอน';
+  const discLine = (s.discPct > 0)
+    ? `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed var(--border);font-size:.8rem;color:var(--text3)">
+        <span>ยอดก่อนส่วนลด</span><span style="font-family:'JetBrains Mono',monospace">฿${(s.subtotal||s.total).toFixed(2)}</span>
+       </div>
+       <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed var(--border);font-size:.8rem;color:var(--green);font-weight:700">
+        <span>💵 ส่วนลด ${s.discPct}%</span><span style="font-family:'JetBrains Mono',monospace">-฿${(s.discAmt||0).toFixed(2)}</span>
+       </div>` : '';
+
+  document.getElementById('bill-detail-meta').textContent = s.billNo + ' · ' + s.customer + ' · ' + s.date;
+  document.getElementById('bill-detail-body').innerHTML = `
+    <div style="margin-bottom:14px;padding:10px 14px;background:var(--surface2);border-radius:8px;
+      font-size:.8rem;line-height:2;font-family:'JetBrains Mono',monospace;color:var(--text2)">
+      <span style="color:var(--text3)">ผู้ซื้อ&nbsp;&nbsp;&nbsp;</span>: <b style="color:var(--text)">${s.customer}</b><br>
+      <span style="color:var(--text3)">วิธีชำระ</span>: ${payLabel}<br>
+      <span style="color:var(--text3)">วันที่&nbsp;&nbsp;&nbsp;</span>: ${s.date}&nbsp; ${s.time}
+    </div>
+    ${s.items.map(it => {
+      const vbg  = it.variant==='O'?'rgba(59,130,246,.15)':it.variant==='U'?'rgba(245,158,11,.15)':it.variant==='D'?'rgba(139,92,246,.15)':'rgba(16,185,129,.15)';
+      const vclr = it.variant==='O'?'var(--blue)':it.variant==='U'?'var(--gold)':it.variant==='D'?'var(--purple)':'var(--green)';
+      return `<div style="display:flex;justify-content:space-between;align-items:center;
+          padding:9px 0;border-bottom:1px solid var(--border);font-size:.83rem">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.95rem;color:var(--cyan)">${it.code}</span>
+            <span style="background:${vbg};color:${vclr};font-family:'JetBrains Mono',monospace;
+              font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:4px">${it.variant}</span>
+            <span style="color:var(--text3);font-size:.75rem">฿${it.price.toFixed(2)} × ${it.qty} ชิ้น</span>
+          </div>
+          <span style="font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--text)">฿${(it.price*it.qty).toFixed(2)}</span>
+        </div>`;
+    }).join('')}
+    ${discLine}
+    <div style="display:flex;justify-content:space-between;align-items:center;
+      margin-top:14px;padding:12px 16px;background:var(--surface3);border-radius:8px">
+      <span style="font-size:.82rem;color:var(--text2)">ยอดสุทธิ</span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:1.4rem;font-weight:700;color:var(--gold)">฿${s.total.toFixed(2)}</span>
+    </div>`;
+
+  document.getElementById('bill-detail-modal').classList.add('show');
+}
+
+// ============================================================
+// SALES PAGE
+// ============================================================
+let slPeriod = 'today';
+
+function setSalesPeriod(p) {
+  slPeriod = p;
+  ['today','week','month','custom'].forEach(m => document.getElementById('sl-'+m).classList.toggle('active', m===p));
+  document.getElementById('sl-range-row').classList.toggle('show', p==='custom');
+  if (p === 'custom') {
+    const t = toVal(new Date());
+    if (!document.getElementById('sl-to').value)   document.getElementById('sl-to').value = t;
+    if (!document.getElementById('sl-from').value) document.getElementById('sl-from').value = t;
+  }
+  renderSales();
+}
+
+function getSlRange() {
+  if (slPeriod !== 'custom') return getRange(slPeriod);
+  const fv = document.getElementById('sl-from').value;
+  const tv = document.getElementById('sl-to').value;
+  if (!fv || !tv) return null;
+  const [fy,fm,fd] = fv.split('-').map(Number);
+  const [ty,tm,td] = tv.split('-').map(Number);
+  return { from: new Date(fy,fm-1,fd), to: new Date(ty,tm-1,td) };
+}
+
+function renderSales() {
+  allSales = loadSales();
+  const range = getSlRange();
+  if (!range) return;
+  const sales = filterSales(range.from, range.to);
+
+  const total = sales.reduce((s,b) => s+b.total, 0);
+  const maxB  = sales.reduce((m,b) => Math.max(m,b.total), 0);
+  const avg   = sales.length ? total/sales.length : 0;
+
+  document.getElementById('sl-total').textContent  = fmtMoney(total);
+  document.getElementById('sl-bills').textContent  = sales.length;
+  document.getElementById('sl-max').textContent    = fmtMoney(maxB);
+  document.getElementById('sl-avg').textContent    = fmtMoney(avg);
+
+  // Sparkline by day
+  const dayMap = {};
+  const cur = new Date(range.from);
+  while (cur <= range.to) {
+    dayMap[toVal(cur)] = 0;
+    cur.setDate(cur.getDate() + 1);
+  }
+  sales.forEach(s => { const k = toVal(s.dateObj); if (k in dayMap) dayMap[k] += s.total; });
+  const dayEntries = Object.entries(dayMap);
+  const maxDay = Math.max(...dayEntries.map(([,v]) => v), 1);
+
+  document.getElementById('sl-chart-sub').textContent = dayEntries.length + ' วัน';
+  document.getElementById('sl-sparkline').innerHTML = dayEntries.map(([d, v]) => {
+    const h = Math.max(4, Math.round(v / maxDay * 72));
+    return `<div class="spark-bar" style="height:${h}px;background:${v > 0 ? 'var(--blue)' : 'var(--surface3)'};flex:1;min-width:14px" title="${d}: ฿${v.toFixed(0)}"></div>`;
+  }).join('');
+  document.getElementById('sl-day-labels').innerHTML = dayEntries.map(([d]) => {
+    const dt = new Date(d);
+    return `<div style="flex:1;text-align:center;font-size:0.58rem;color:var(--text3);min-width:14px">${dt.getDate()}</div>`;
+  }).join('');
+
+  // Bills table
+  document.getElementById('sl-bill-count').textContent = sales.length + ' รายการ';
+  document.getElementById('sl-bill-table').innerHTML = sales.length === 0
+    ? '<div class="empty-dash"><div class="ei">📋</div>ยังไม่มีข้อมูล</div>'
+    : buildBillTable(sales);
+}
+
+// ============================================================
+// CUSTOMERS PAGE
+// ============================================================
+let cuPeriod = 'today';
+
+function setCustPeriod(p) {
+  cuPeriod = p;
+  ['today','week','month','all'].forEach(m => document.getElementById('cu-'+m).classList.toggle('active', m===p));
+  renderCustomers();
+}
+
+function renderCustomers() {
+  allSales = loadSales();
+  const range = getRange(cuPeriod);
+  if (!range) return;
+  const sales = filterSales(range.from, range.to);
+
+  const custMap = {};
+  sales.forEach(s => {
+    if (!custMap[s.customer]) custMap[s.customer] = { name:s.customer, total:0, bills:0, qty:0 };
+    custMap[s.customer].total += s.total;
+    custMap[s.customer].bills++;
+    custMap[s.customer].qty += s.items.reduce((a,i) => a+i.qty, 0);
+  });
+  const list = Object.values(custMap).sort((a,b) => b.total-a.total);
+
+  // Customer cards
+  document.getElementById('cust-grid').innerHTML = list.length === 0
+    ? '<div class="empty-dash" style="grid-column:1/-1"><div class="ei">👥</div>ยังไม่มีข้อมูล</div>'
+    : list.slice(0, 9).map((c, i) => `
+        <div class="card" style="padding:16px">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+            <div style="width:36px;height:36px;border-radius:50%;background:var(--surface3);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0">
+              ${i < 3 ? ['🥇','🥈','🥉'][i] : '👤'}
+            </div>
+            <div>
+              <div style="font-weight:700;font-size:0.88rem">${c.name}</div>
+              <div style="font-size:0.7rem;color:var(--text3)">${c.bills} บิล · ${c.qty} ชิ้น</div>
+            </div>
+          </div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:1.1rem;font-weight:700;color:var(--gold)">
+            ฿${c.total.toLocaleString('th-TH',{minimumFractionDigits:2})}
+          </div>
+        </div>`).join('');
+
+  // Bar chart
+  const maxT = list[0] ? list[0].total : 1;
+  document.getElementById('cust-bar-count').textContent = list.length + ' ลูกค้า';
+  document.getElementById('cust-bar').innerHTML = list.length === 0
+    ? '<div class="empty-dash" style="padding:16px"><div class="ei">👥</div>ยังไม่มีข้อมูล</div>'
+    : list.map(c => `
+        <div class="bar-row">
+          <div class="bar-label">${c.name}</div>
+          <div class="bar-track"><div class="bar-fill" style="width:${(c.total/maxT*100).toFixed(1)}%;background:#b07fd4;opacity:.85"></div></div>
+          <div class="bar-val">${fmtMoney(c.total)}</div>
+        </div>`).join('');
+}
+
+// ============================================================
+// PRODUCTS PAGE
+// ============================================================
+let prPeriod = 'today';
+
+function setProdPeriod(p) {
+  prPeriod = p;
+  ['today','week','month','all'].forEach(m => document.getElementById('pr-'+m).classList.toggle('active', m===p));
+  renderProducts();
+}
+
+function renderProducts() {
+  allSales = loadSales();
+  const range = getRange(prPeriod);
+  if (!range) return;
+  const sales = filterSales(range.from, range.to);
+
+  const items = sales.flatMap(s => s.items);
+
+  // O vs U
+  const oItems = items.filter(i => i.variant === 'O');
+  const uItems = items.filter(i => i.variant === 'U');
+  const oQty = oItems.reduce((s,i) => s+i.qty, 0);
+  const uQty = uItems.reduce((s,i) => s+i.qty, 0);
+  const oAmt = oItems.reduce((s,i) => s+i.price*i.qty, 0);
+  const uAmt = uItems.reduce((s,i) => s+i.price*i.qty, 0);
+  const maxOU = Math.max(oAmt, uAmt, 1);
+
+  document.getElementById('ou-compare').innerHTML = `
+    <div style="margin-bottom:16px">
+      <div class="bar-row" style="margin-bottom:10px">
+        <div class="bar-label" style="color:#6ab8c8;font-weight:700">แบบ O</div>
+        <div class="bar-track"><div class="bar-fill" style="width:${(oAmt/maxOU*100).toFixed(1)}%;background:#6ab8c8;opacity:.85"></div></div>
+        <div class="bar-val">${fmtMoney(oAmt)}</div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label" style="color:#c4a06a;font-weight:700">แบบ U</div>
+        <div class="bar-track"><div class="bar-fill" style="width:${(uAmt/maxOU*100).toFixed(1)}%;background:#c4a06a;opacity:.85"></div></div>
+        <div class="bar-val">${fmtMoney(uAmt)}</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px">
+      <div style="background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2);border-radius:8px;padding:12px;text-align:center">
+        <div style="font-size:0.68rem;color:var(--text3);margin-bottom:4px">O ชิ้นรวม</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:1.1rem;font-weight:700;color:var(--blue)">${oQty}</div>
+      </div>
+      <div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:8px;padding:12px;text-align:center">
+        <div style="font-size:0.68rem;color:var(--text3);margin-bottom:4px">U ชิ้นรวม</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:1.1rem;font-weight:700;color:var(--gold)">${uQty}</div>
+      </div>
+    </div>`;
+
+  // 2-digit vs 3-digit
+  const d2Items = items.filter(i => i.code.length === 2);
+  const d3Items = items.filter(i => i.code.length === 3);
+  const d2Amt = d2Items.reduce((s,i) => s+i.price*i.qty, 0);
+  const d3Amt = d3Items.reduce((s,i) => s+i.price*i.qty, 0);
+  const maxD = Math.max(d2Amt, d3Amt, 1);
+
+  document.getElementById('digit-compare').innerHTML = `
+    <div style="margin-bottom:16px">
+      <div class="bar-row" style="margin-bottom:10px">
+        <div class="bar-label" style="color:#5aab8a;font-weight:700">2 หลัก</div>
+        <div class="bar-track"><div class="bar-fill" style="width:${(d2Amt/maxD*100).toFixed(1)}%;background:#5aab8a;opacity:.85"></div></div>
+        <div class="bar-val">${fmtMoney(d2Amt)}</div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label" style="color:#b07fd4;font-weight:700">3 หลัก</div>
+        <div class="bar-track"><div class="bar-fill" style="width:${(d3Amt/maxD*100).toFixed(1)}%;background:#b07fd4;opacity:.85"></div></div>
+        <div class="bar-val">${fmtMoney(d3Amt)}</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px">
+      <div style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);border-radius:8px;padding:12px;text-align:center">
+        <div style="font-size:0.68rem;color:var(--text3);margin-bottom:4px">2 หลัก ชิ้น</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:1.1rem;font-weight:700;color:var(--green)">${d2Items.reduce((s,i)=>s+i.qty,0)}</div>
+      </div>
+      <div style="background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.2);border-radius:8px;padding:12px;text-align:center">
+        <div style="font-size:0.68rem;color:var(--text3);margin-bottom:4px">3 หลัก ชิ้น</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:1.1rem;font-weight:700;color:var(--purple)">${d3Items.reduce((s,i)=>s+i.qty,0)}</div>
+      </div>
+    </div>`;
+
+  // Top products
+  const prodMap = {};
+  items.forEach(i => {
+    const k = `${i.code}(${i.variant})`;
+    if (!prodMap[k]) prodMap[k] = { key:k, qty:0, amt:0 };
+    prodMap[k].qty += i.qty;
+    prodMap[k].amt += i.price * i.qty;
+  });
+  const prodList = Object.values(prodMap).sort((a,b) => b.amt-a.amt).slice(0, 10);
+  const maxP = prodList[0] ? prodList[0].amt : 1;
+
+  const softColors = ['#4e9bb5','#5aab8a','#7b8fd4','#b07fd4','#d4956a','#6ab8c8','#8fc47a','#c4a06a','#a07ab8','#6a9dc4'];
+
+  document.getElementById('prod-bar').innerHTML = prodList.length === 0
+    ? '<div class="empty-dash" style="padding:16px"><div class="ei">📦</div>ยังไม่มีข้อมูล</div>'
+    : prodList.map((p, idx) => `
+        <div class="bar-row">
+          <div class="bar-label" style="font-family:'JetBrains Mono',monospace;color:${softColors[idx%softColors.length]}">${p.key}</div>
+          <div class="bar-track"><div class="bar-fill" style="width:${(p.amt/maxP*100).toFixed(1)}%;background:${softColors[idx%softColors.length]};opacity:.85"></div></div>
+          <div class="bar-val" style="color:var(--text2)">${p.qty} ชิ้น · ${fmtMoney(p.amt)}</div>
+        </div>`).join('');
+}
+
+// ============================================================
+// PAYMENT PAGE
+// ============================================================
+let pmPeriod = 'today';
+
+function setPayPeriod(p) {
+  pmPeriod = p;
+  ['today','week','month','all'].forEach(m => document.getElementById('pm-'+m).classList.toggle('active', m===p));
+  renderPayment();
+}
+
+function renderPayment() {
+  allSales = loadSales();
+  const range = getRange(pmPeriod);
+  if (!range) return;
+  const sales = filterSales(range.from, range.to);
+
+  const cash   = sales.filter(s => s.payType === 'cash');
+  const credit = sales.filter(s => s.payType === 'credit');
+  const cashAmt   = cash.reduce((s,b) => s+b.total, 0);
+  const creditAmt = credit.reduce((s,b) => s+b.total, 0);
+  const totalAmt  = cashAmt + creditAmt || 1;
+
+  document.getElementById('pm-cash-total').textContent   = fmtMoney(cashAmt);
+  document.getElementById('pm-credit-total').textContent = fmtMoney(creditAmt);
+  document.getElementById('pm-cash-cnt').textContent     = cash.length + ' บิล';
+  document.getElementById('pm-credit-cnt').textContent   = credit.length + ' บิล';
+  document.getElementById('pm-cash-pct').textContent     = Math.round(cashAmt/totalAmt*100) + '%';
+  document.getElementById('pm-credit-pct').textContent   = Math.round(creditAmt/totalAmt*100) + '%';
+
+  const mkList = (bills, el, cntEl) => {
+    document.getElementById(cntEl).textContent = bills.length + ' บิล';
+    document.getElementById(el).innerHTML = bills.length === 0
+      ? `<div class="empty-dash"><div class="ei">${el.includes('cash') ? '💵' : '💳'}</div>ไม่มีรายการ</div>`
+      : `<table class="bill-table">
+          <thead><tr><th>บิล</th><th>ลูกค้า</th><th>เวลา</th><th style="text-align:right">ยอด</th></tr></thead>
+          <tbody>
+            ${bills.map(s => `<tr>
+              <td style="font-family:'JetBrains Mono',monospace;color:var(--cyan);font-weight:700;font-size:0.75rem">${s.billNo}</td>
+              <td style="font-weight:600">${s.customer}</td>
+              <td style="font-family:'JetBrains Mono',monospace;color:var(--text3);font-size:0.75rem">${s.time}</td>
+              <td style="text-align:right;font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--gold)">฿${s.total.toFixed(2)}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>`;
+  };
+
+  mkList(cash,   'pm-cash-list',   'pm-cash-list-cnt');
+  mkList(credit, 'pm-credit-list', 'pm-credit-list-cnt');
+}
+
+// ============================================================
+// ============================================================
+// REWARD ACTIVITY
+// ============================================================
+let rwSessions = [];
+let rwActiveTab = -1;
+let custBonus = {};
+
+const RW_COLORS = { O:'var(--blue)', U:'var(--gold)', D:'var(--purple)', R:'var(--green)' };
+const RW_BG     = { O:'rgba(59,130,246,.15)', U:'rgba(245,158,11,.15)', D:'rgba(139,92,246,.15)', R:'rgba(16,185,129,.15)' };
+
+function initRewardPage() { rwCheckFields(); }
+
+// ── Reward config (มูลค่ารางวัล) ──────────────────────────
+let rwConfig = { R2L:0, R3B:0, O:0, U:0, D:0, R:0, '3DU':0, '3DF':0 };
+
+function rwOpenRewardConfig(){
+  // โหลดค่าที่บันทึกไว้เข้า popup
+  ['R2L','R3B','O','U','D','R','3DU','3DF'].forEach(k=>{
+    const el = document.getElementById('rv-'+k);
+    if(el && rwConfig[k]) el.value = rwConfig[k];
+  });
+  const ov = document.getElementById('rw-config-overlay');
+  ov.style.display='flex';
+}
+
+function rwCloseRewardConfig(){
+  document.getElementById('rw-config-overlay').style.display='none';
+}
+
+function rwSaveConfig(){
+  ['R2L','R3B','O','U','D','R','3DU','3DF'].forEach(k=>{
+    rwConfig[k] = parseFloat((document.getElementById('rv-'+k)||{}).value)||0;
+  });
+  rwCloseRewardConfig();
+  alert('✅ บันทึกมูลค่ารางวัลแล้ว');
+}
+
+// R match — permutation เท่านั้น (ไม่รวมตรงเป๊ะ)
+function rwRMatch(target, candidate) {
+  if (candidate === target) return false;
+  const sortStr = s => s.split('').sort().join('');
+  return sortStr(candidate) === sortStr(target);
+}
+
+function rwFieldChanged() {
+  rwCheckFields();
+}
+
+function rwCheckFields() {
+  const dCode = (document.getElementById('ri-D-code')||{}).value?.trim() || '';
+  const uCode = (document.getElementById('ri-U-code')||{}).value?.trim() || '';
+  const dOk = dCode.length === 3;
+  const uOk = uCode.length === 2;
+  const allFilled = dOk && uOk;
+
+  const dEl = document.getElementById('rw-status-D');
+  const uEl = document.getElementById('rw-status-U');
+  if(dEl){ dEl.textContent=(dOk?'✅ ':'⬜ ')+'D'; dEl.style.color=dOk?'var(--green)':'var(--text3)'; }
+  if(uEl){ uEl.textContent=(uOk?'✅ ':'⬜ ')+'U'; uEl.style.color=uOk?'var(--green)':'var(--text3)'; }
+
+  const btn = document.getElementById('rw-calc-btn');
+  const note = document.getElementById('rw-fill-note');
+  if(btn){
+    btn.disabled = !allFilled;
+    btn.style.background = allFilled ? 'var(--gold)' : 'var(--surface3)';
+    btn.style.color      = allFilled ? '#0b0f1a'    : 'var(--text3)';
+    btn.style.cursor     = allFilled ? 'pointer'    : 'not-allowed';
+  }
+  if(note) note.textContent = allFilled ? '✅ พร้อมคำนวณ' : 'กรอก D (3 หลัก) และ U (2 หลัก) ให้ครบก่อน';
+}
+
+function rwCalc() {
+  allSales = loadSales();
+  const gv = id => (document.getElementById(id)||{}).value||'';
+
+  // เลขโดนใจ
+  const dCode   = gv('ri-D-code').trim().padStart(3,'0');
+  const uCode   = gv('ri-U-code').trim().padStart(2,'0');
+  const tdf1    = gv('ri-3DF-code1').trim().padStart(3,'0');
+  const tdf2    = gv('ri-3DF-code2').trim().padStart(3,'0');
+  const tdu1    = gv('ri-3DU-code1').trim().padStart(3,'0');
+  const tdu2    = gv('ri-3DU-code2').trim().padStart(3,'0');
+
+  // มูลค่ารางวัล (จาก popup config)
+  const vR2L  = rwConfig['R2L']  || 0;
+  const vR3B  = rwConfig['R3B']  || 0;
+  const vO    = rwConfig['O']    || 0;
+  const vU    = rwConfig['U']    || 0;
+  const vD    = rwConfig['D']    || 0;
+  const vR    = rwConfig['R']    || 0;
+  const v3DU  = rwConfig['3DU']  || 0;
+  const v3DF  = rwConfig['3DF']  || 0;
+
+  // 2 ตัวล่างของ D (เลขท้าย 2 ตัว)
+  const dLast2 = dCode.slice(-2);
+
+  // helper: 3LN/3LB — มีเลขซ้ำ
+  const hasDup = c => { const s=c.padStart(3,'0'); return s[0]===s[1]||s[1]===s[2]||s[0]===s[2]; };
+
+  // เก็บผลรางวัลลูกค้า
+  const custMap = {};
+  const addReward = (customer, billNo, label, variant, code, saleAmt, rewardVal) => {
+    if(!rewardVal) return;
+    if(!custMap[customer]) custMap[customer]={sales:0,reward:0,details:[],bills:new Set()};
+    const reward = saleAmt * rewardVal;
+    custMap[customer].reward += reward;
+    custMap[customer].bills.add(billNo);
+    custMap[customer].details.push({label,variant,code,saleAmt,rewardVal,reward});
+  };
+
+  let grandSales=0, grandReward=0;
+
+  allSales.forEach(sale => {
+    sale.items.forEach(item => {
+      const code3 = item.code.padStart(3,'0');
+      const code2 = item.code.padStart(2,'0');
+      const code1 = item.code.padStart(1,'0');
+      const amt   = item.price * item.qty;
+      const v     = item.variant;
+      const cust  = sale.customer;
+      const bill  = sale.billNo;
+
+      // ── 3.1 R2ล่าง → ตรงเลขใดใน U 2 หลัก ──
+      if(v==='R2ล่าง' && vR2L){
+        const dig = code1; // 1 หลัก
+        if(uCode.includes(dig)){ addReward(cust,bill,'R2ล่าง',v,code1,amt,vR2L); grandSales+=amt; grandReward+=amt*vR2L; }
+      }
+
+      // ── 3.1 R3บน → ตรงเลขใดใน D 3 หลัก ──
+      if(v==='R3บน' && vR3B){
+        const dig = code1;
+        if(dCode.includes(dig)){ addReward(cust,bill,'R3บน',v,code1,amt,vR3B); grandSales+=amt; grandReward+=amt*vR3B; }
+      }
+
+      // ── 3.2 O (2 ตัวบน) → ตรงเลขท้าย 2 ตัวของ D ──
+      if(v==='O' && vO && code2===dLast2){ addReward(cust,bill,'O (2 ตัวบน)',v,code2,amt,vO); grandSales+=amt; grandReward+=amt*vO; }
+
+      // ── 3.2 U (2 ตัวล่าง) → ตรงกับ U ──
+      if(v==='U' && vU && code2===uCode){ addReward(cust,bill,'U (2 ตัวล่าง)',v,code2,amt,vU); grandSales+=amt; grandReward+=amt*vU; }
+
+      // ── 3.3 D (ตรง) ──
+      if(v==='D' && vD && code3===dCode){ addReward(cust,bill,'D (ตรง)',v,code3,amt,vD); grandSales+=amt; grandReward+=amt*vD; }
+
+      // ── 3.3 R (โต๊ด) ──
+      if(v==='R' && vR && rwRMatch(dCode,code3)){ addReward(cust,bill,'R (โต๊ด)',v,code3,amt,vR); grandSales+=amt; grandReward+=amt*vR; }
+
+      // ── 3.3 3DU ──
+      if(v==='3DU' && v3DU && (code3===tdu1||code3===tdu2)){ addReward(cust,bill,'3DU (3 ตัวล่าง)',v,code3,amt,v3DU); grandSales+=amt; grandReward+=amt*v3DU; }
+
+      // ── 3.3 3DF ──
+      if(v==='3DF' && v3DF && (code3===tdf1||code3===tdf2)){ addReward(cust,bill,'3DF (3 ตัวหน้า)',v,code3,amt,v3DF); grandSales+=amt; grandReward+=amt*v3DF; }
+
+      // ── 3.4 Z (×3) ลุ้น 4 ต่อ ──
+      if(v==='Z'){
+        if(vD && code3===dCode){  addReward(cust,bill,'Z ต่อ1: ตรง D',v,code3,amt,vD); grandReward+=amt*vD; }
+        if(vR && rwRMatch(dCode,code3)){ addReward(cust,bill,'Z ต่อ2: โต๊ด R',v,code3,amt,vR); grandReward+=amt*vR; }
+        if(vR && (code3===tdu1||code3===tdu2)){ addReward(cust,bill,'Z ต่อ3: ตรง 3DU',v,code3,amt,vR); grandReward+=amt*vR; }
+        if(vR && (code3===tdf1||code3===tdf2)){ addReward(cust,bill,'Z ต่อ4: ตรง 3DF',v,code3,amt,vR); grandReward+=amt*vR; }
+      }
+
+      // ── 3.5 6D (×6) ลุ้น 4 ต่อ ──
+      if(v==='6D'){
+        if(vD && code3===dCode){  addReward(cust,bill,'6D ต่อ1: ตรง D',v,code3,amt,vD); grandReward+=amt*vD; }
+        if(vR && rwRMatch(dCode,code3)){ addReward(cust,bill,'6D ต่อ2: โต๊ด R',v,code3,amt,vR); grandReward+=amt*vR; }
+        if(vD && (code3===tdu1||code3===tdu2)){ addReward(cust,bill,'6D ต่อ3: ตรง 3DU',v,code3,amt,vD); grandReward+=amt*vD; }
+        if(vD && (code3===tdf1||code3===tdf2)){ addReward(cust,bill,'6D ต่อ4: ตรง 3DF',v,code3,amt,vD); grandReward+=amt*vD; }
+      }
+
+      // ── 3.6 3LN (เลขเบิ้ลปกติ) ──
+      if(v==='3LN' && hasDup(code3)){
+        if(vD && code3===dCode){ addReward(cust,bill,'3LN ตรง D',v,code3,amt,vD); grandSales+=amt; grandReward+=amt*vD; }
+        if(vR && rwRMatch(dCode,code3)){ addReward(cust,bill,'3LN โต๊ด R',v,code3,amt,vR); grandSales+=amt; grandReward+=amt*vR; }
+      }
+
+      // ── 3.6 3LB (เบิ้ล 3 กลับ) ──
+      if(v==='3LB' && hasDup(code3)){
+        if(vD && rwRMatch(dCode,code3)){ addReward(cust,bill,'3LB โต๊ดตรง D',v,code3,amt,vD); grandSales+=amt; grandReward+=amt*vD; }
+      }
+    });
+  });
+
+  // คำนวณ total reward ต่อลูกค้า
+  Object.keys(custMap).forEach(cust=>{
+    const b = parseFloat(custBonus[cust]||0);
+    custMap[cust].bonus = b;
+    custMap[cust].totalReward = custMap[cust].reward + b;
+  });
+
+  const totalAllSales = allSales.reduce((s,sale)=>s+sale.total,0);
+
+  const now = new Date();
+  const session = { id:Date.now(),
+    label: now.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}),
+    timestamp: now.toLocaleString('th-TH'),
+    configs:[], custMap, grandSales, grandReward, totalAllSales,
+    dCode, uCode, tdu1, tdu2, tdf1, tdf2, rwConfig:{...rwConfig},
+    custBonus:{...custBonus} };
+  rwSessions.unshift(session);
+  rwActiveTab = session.id;
+  renderRwTabs(); renderRwResult(session);
+  document.getElementById('rw-results-wrap').style.display = '';
+  document.getElementById('rw-export-btn').style.display = '';
+  setTimeout(()=>document.getElementById('rw-results-wrap').scrollIntoView({behavior:'smooth',block:'start'}),100);
+}
+
+function renderRwTabs() {
+  document.getElementById('rw-tabs').innerHTML = rwSessions.map(s =>
+    '<button class="rw-tab' + (s.id===rwActiveTab?' active':'') + '" onclick="rwShowTab('+s.id+')" style="' +
+    (s.id===rwActiveTab?'background:rgba(245,158,11,.15);border-color:var(--gold);color:var(--gold);font-weight:700':'') +
+    '">🎁 '+s.label+'</button>'
+  ).join('');
+}
+
+function rwShowTab(id) {
+  rwActiveTab = id;
+  renderRwTabs();
+  const s = rwSessions.find(x => x.id===id);
+  if (s) renderRwResult(s);
+}
+
+function renderRwResult(session) {
+  const { custMap, grandSales, grandReward, totalAllSales, dCode, uCode, rwConfig:cfg } = session;
+  const custList = Object.entries(custMap).sort((a,b) => b[1].totalReward - a[1].totalReward);
+  const allSalesTotal = totalAllSales || 0;
+  const grandDiff     = allSalesTotal - grandReward;
+  const diffFmt       = (grandDiff>=0?'+':'−')+'฿'+Math.abs(grandDiff).toLocaleString('th-TH',{minimumFractionDigits:2});
+  const diffColor     = grandDiff>=0?'var(--green)':'var(--red)';
+
+  document.getElementById('rw-result-content').innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px">
+      <div class="kpi-card purple"><div class="kpi-label">เลขโดนใจ D</div><div class="kpi-val" style="font-family:'JetBrains Mono',monospace">${dCode||'—'}</div></div>
+      <div class="kpi-card gold"><div class="kpi-label">เลขโดนใจ U</div><div class="kpi-val" style="font-family:'JetBrains Mono',monospace">${uCode||'—'}</div></div>
+      <div class="kpi-card green">
+        <div class="kpi-label">ยอดขายรวม (ทุกบิล)</div>
+        <div class="kpi-val">${fmtMoney(allSalesTotal)}</div>
+        <div class="kpi-sub" style="font-size:.68rem;margin-top:3px">ตรงเงื่อนไข: ${fmtMoney(grandSales)}</div>
+      </div>
+      <div class="kpi-card ${grandDiff>=0?'green':'red'}">
+        <div class="kpi-label">ส่วนต่าง (ยอด−รางวัล)</div>
+        <div class="kpi-val" style="color:${grandColor}">${diffFmt}</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:16px">
+      <div class="kpi-card gold"><div class="kpi-label">มูลค่ารางวัลรวม</div><div class="kpi-val">${fmtMoney(grandReward)}</div></div>
+      <div class="kpi-card blue"><div class="kpi-label">ลูกค้าได้รับรางวัล</div><div class="kpi-val">${custList.length} คน</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h3>👥 สรุปรางวัลรายลูกค้า</h3><span style="font-size:.7rem;color:var(--text3)">${session.timestamp}</span></div>
+      <div style="overflow-x:auto"><table class="bill-table">
+        <thead><tr><th>ลูกค้า</th><th>รายละเอียดรางวัล</th><th style="text-align:right">รางวัลรวม</th><th style="text-align:right">โบนัสพิเศษ</th><th style="text-align:right">รวมทั้งสิ้น</th></tr></thead>
+        <tbody>${custList.map(([cust,c])=>`<tr>
+          <td style="font-weight:700">${cust}</td>
+          <td style="font-size:.75rem;line-height:2">${c.details.map(d=>
+            `<span style="display:inline-flex;align-items:center;gap:4px;margin:1px 4px 1px 0;background:var(--surface2);border-radius:6px;padding:2px 8px">
+              <span style="font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--cyan)">${d.code}</span>
+              <span style="font-size:.7rem;color:var(--text3)">${d.label}</span>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--gold)">฿${d.reward.toLocaleString('th-TH',{minimumFractionDigits:2})}</span>
+            </span>`).join('')}</td>
+          <td style="text-align:right;font-family:'JetBrains Mono',monospace;color:var(--gold)">฿${c.reward.toLocaleString('th-TH',{minimumFractionDigits:2})}</td>
+          <td style="text-align:right"><input type="number" placeholder="0" value="${custBonus[cust]||''}" class="bonus-input" onchange="rwSetBonus('${cust}',this.value)"></td>
+          <td style="text-align:right;font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--gold)">฿${c.totalReward.toLocaleString('th-TH',{minimumFractionDigits:2})}</td>
+        </tr>`).join('')}
+        </tbody>
+      </table></div>
+    </div>`;
+
+function rwSetBonus(cust, val) { custBonus[cust] = parseFloat(val)||0; rwCalc(); }
+
+function rwClearAll() {
+  if (!confirm('ยืนยันล้างผลการคำนวณทั้งหมด?')) return;
+  rwSessions=[]; rwActiveTab=-1; custBonus={};
+  document.getElementById('rw-results-wrap').style.display='none';
+  document.getElementById('rw-export-btn').style.display='none';
+  document.getElementById('rw-result-content').innerHTML='';
+  document.getElementById('rw-tabs').innerHTML='';
+}
+
+function rwExportPDF() {
+  const session = rwSessions.find(s => s.id===rwActiveTab);
+  if (!session) return;
+  const { custMap, grandSales, grandReward, totalAllSales, dCode, uCode } = session;
+  const allSalesTot = totalAllSales || 0;
+  const custList = Object.entries(custMap).sort((a,b) => b[1].totalReward-a[1].totalReward);
+  const gd = allSalesTot - grandReward;
+  const gdf = (gd>=0?'+':'−')+'฿'+Math.abs(gd).toLocaleString('th-TH',{minimumFractionDigits:2});
+  const html = '<!DOCTYPE html><html lang="th"><head><meta charset="UTF-8"><title>ผลรางวัล</title>'
+    +'<style>body{font-family:Arial,sans-serif;padding:28px;color:#1a1612;font-size:12px}'
+    +'h1{font-size:18px;margin-bottom:4px}.sub{font-size:11px;color:#888;margin-bottom:20px}'
+    +'.krow{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}'
+    +'.k{background:#f5f0e8;border-radius:6px;padding:10px 13px}'
+    +'.kl{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:#888;margin-bottom:3px}'
+    +'.kv{font-size:16px;font-weight:700}h2{font-size:13px;font-weight:700;margin:18px 0 7px;border-bottom:1px solid #ccc;padding-bottom:5px}'
+    +'table{width:100%;border-collapse:collapse;font-size:11px}'
+    +'th{background:#f0ebe0;padding:7px 9px;text-align:left;font-size:9px;text-transform:uppercase;letter-spacing:.7px;font-weight:600}'
+    +'td{padding:7px 9px;border-bottom:1px solid #ede8df}.r{text-align:right}.mono{font-family:monospace}'
+    +'.gold{color:#92400e;font-weight:700}.green{color:#166534}.red{color:#991b1b;font-weight:700}'
+    +'.foot{margin-top:24px;font-size:10px;color:#aaa;text-align:center}'
+    +'@media print{body{padding:12px}}</style></head><body>'
+    +'<h1>🎁 รายงานผลกิจกรรมรางวัล</h1>'
+    +'<div class="sub">สร้างเมื่อ: '+session.timestamp+'</div>'
+    +'<div class="krow">'
+    +'<div class="k"><div class="kl">เลขโดนใจ D</div><div class="kv" style="font-family:monospace;color:#7c3aed">'+(dCode||'—')+'</div></div>'
+    +'<div class="k"><div class="kl">เลขโดนใจ U</div><div class="kv" style="font-family:monospace;color:#b45309">'+(uCode||'—')+'</div></div>'
+    +'<div class="k"><div class="kl">ยอดขายรวม (ทุกบิล)</div><div class="kv green">฿'+allSalesTot.toLocaleString('th-TH',{minimumFractionDigits:2})+'<div style="font-size:9px;color:#888;font-weight:400;margin-top:2px">ตรงเงื่อนไข: ฿'+grandSales.toLocaleString('th-TH',{minimumFractionDigits:2})+'</div></div></div>'
+    +'<div class="k"><div class="kl">ส่วนต่าง (ยอด−รางวัล)</div><div class="kv '+(gd>=0?'green':'red')+'">'+gdf+'</div></div>'
+    +'</div>'
+    +'<div class="k" style="margin-bottom:20px"><div class="kl">มูลค่ารางวัลรวม</div><div class="kv gold">฿'+grandReward.toLocaleString('th-TH',{minimumFractionDigits:2})+'</div></div>'
+    +'<h2>สรุปรางวัลรายลูกค้า</h2>'
+    +'<table><thead><tr><th>ลูกค้า</th><th>รายละเอียดรางวัล</th><th class="r">รางวัลรวม</th><th class="r">โบนัส</th><th class="r">รวมทั้งสิ้น</th></tr></thead><tbody>'
+    +custList.map(([cust,c])=>'<tr><td><b>'+cust+'</b></td><td style="font-size:10px">'+c.details.map(d=>d.label+' ['+d.code+'] ฿'+d.reward.toLocaleString('th-TH',{minimumFractionDigits:2})).join('<br>')+'</td><td class="r mono gold">฿'+c.reward.toLocaleString('th-TH',{minimumFractionDigits:2})+'</td><td class="r mono">฿'+(c.bonus||0).toLocaleString('th-TH',{minimumFractionDigits:2})+'</td><td class="r mono gold" style="font-weight:700">฿'+c.totalReward.toLocaleString('th-TH',{minimumFractionDigits:2})+'</td></tr>').join('')
+    +'</tbody></table>'
+    +'<div class="foot">ระบบขายสินค้า — ออกรายงานอัตโนมัติ</div>'
+    +'<scr'+'ipt>window.onload=function(){window.print();}</scr'+'ipt>'
+    +'</body></html>';
+  const w = window.open('','_blank');
+  if (w) { w.document.write(html); w.document.close(); }
+}
+
+// DATETIME
+// ============================================================
+function updateDt() {
+  const now = new Date();
+  document.getElementById('dash-datetime').textContent = now.toLocaleDateString('th-TH') + ' ' + now.toLocaleTimeString('th-TH');
+}
+
+// ============================================================
+// INIT
+// ============================================================
+updateDt();
+setInterval(updateDt, 1000);
+
+// โหลดจาก Firebase แล้ว render หน้าแรก
+async function initDashboard() {
+  const fbData = await fetchFromFirebase();
+  if (fbData && fbData.length > 0) {
+    allSales = fbData;
+  } else {
+    allSales = generateDemoData();
+  }
+  renderOverview();
+}
+
+// Refresh ทุก 30 วินาที
+async function refreshData() {
+  const fbData = await fetchFromFirebase();
+  if (fbData && fbData.length > 0) {
+    allSales = fbData;
+    if (currentPage === 'overview')   renderOverview();
+    if (currentPage === 'sales')      renderSales();
+    if (currentPage === 'customers')  renderCustomers();
+    if (currentPage === 'products')   renderProducts();
+    if (currentPage === 'payment')    renderPayment();
+  }
+}
+
+// initDashboard called after login
+setInterval(refreshData, 30000);
+// ── LOGIN SYSTEM ──────────────────────────────────────────
+const FB_AUTH = 'https://magic-number-7b488-default-rtdb.asia-southeast1.firebasedatabase.app';
+const ALLOWED_ROLES_DASH = ['admin','manager']; // ผู้บริหารและ admin เท่านั้น
+
+async function checkLogin(){
+  const sess = sessionStorage.getItem('mn_session');
+  if(sess){
+    try{
+      const u = JSON.parse(sess);
+      if(ALLOWED_ROLES_DASH.includes(u.role)){ applySession(u); return; }
+    }catch(e){}
+    sessionStorage.removeItem('mn_session');
+  }
+  // แสดง Login modal
+  const ov = document.getElementById('login-overlay');
+  ov.style.display='flex';
+}
+
+function togglePass(){
+  const inp = document.getElementById('login-pass');
+  const btn = document.getElementById('eye-btn');
+  if(inp.type==='password'){ inp.type='text'; btn.textContent='🙈'; }
+  else{ inp.type='password'; btn.textContent='👁️'; }
+}
+
+async function doLogin(){
+  const username = document.getElementById('login-user').value.trim().toLowerCase();
+  const password = document.getElementById('login-pass').value;
+  const errEl = document.getElementById('login-err');
+  const btn = document.getElementById('login-btn');
+  if(!username||!password){ errEl.textContent='กรุณากรอกชื่อผู้ใช้และรหัสผ่าน'; return; }
+  btn.disabled=true; errEl.textContent='กำลังตรวจสอบ...';
+  try{
+    const res = await fetch(FB_AUTH+'/users/'+username+'.json');
+    const data = await res.json();
+    if(!data){ errEl.textContent='ไม่พบผู้ใช้งานนี้'; btn.disabled=false; return; }
+    if(data.password !== password){ errEl.textContent='รหัสผ่านไม่ถูกต้อง'; btn.disabled=false; return; }
+    if(!ALLOWED_ROLES_DASH.includes(data.role)){
+      if(data.role==='seller'){
+        // ผู้ขาย → redirect ไปหน้าระบบขาย
+        const session = {username, role:data.role, name:data.name||username};
+        sessionStorage.setItem('mn_session', JSON.stringify(session));
+        errEl.textContent='กำลังพาไปหน้าระบบขาย...';
+        setTimeout(()=>{ window.location.href='sales_program_v3.html'; }, 800);
+      } else {
+        errEl.textContent='บัญชีนี้ไม่มีสิทธิ์เข้า Dashboard';
+      }
+      btn.disabled=false; return;
+    }
+    const session = {username, role:data.role, name:data.name||username};
+    sessionStorage.setItem('mn_session', JSON.stringify(session));
+    applySession(session);
+  }catch(e){
+    errEl.textContent='ไม่สามารถเชื่อมต่อได้ กรุณาลองใหม่';
+    btn.disabled=false;
+  }
+}
+
+function applySession(u){
+  document.getElementById('login-overlay').style.display='none';
+  // แสดงชื่อ user ใน sidebar บนซ้าย
+  const roleLabel = u.role==='admin'?'ผู้ดูแลระบบ':u.role==='manager'?'ผู้บริหาร':'ผู้ขาย';
+  const roleIcon  = u.role==='admin'?'👑':u.role==='manager'?'📊':'🛒';
+  document.getElementById('sidebar-user').style.display='';
+  document.getElementById('sidebar-username').textContent = u.name||u.username;
+  document.getElementById('sidebar-role-icon').textContent = roleIcon;
+  document.getElementById('sidebar-role-text').textContent = roleLabel;
+  // แสดงปุ่ม logout ใน sidebar ล่าง
+  document.getElementById('sidebar-logout').style.display='';
+  // ซ่อน floating badge เดิม
+  document.getElementById('login-user-badge').style.display='none';
+  initDashboard();
+}
+
+function doLogout(){
+  if(!confirm('ยืนยันออกจากระบบ?')) return;
+  sessionStorage.removeItem('mn_session');
+  location.reload();
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  checkLogin();
+});
+
+</script>
+
+<!-- LOGIN OVERLAY -->
+<div id="login-overlay">
+  <div id="login-box">
+    <div id="login-logo">🔐</div>
+    <div id="login-title">Magic Number</div>
+    <div id="login-sub">กรุณาเข้าสู่ระบบก่อนใช้งาน</div>
+    <div class="login-field">
+      <label>ชื่อผู้ใช้</label>
+      <input type="text" id="login-user" placeholder="username" autocomplete="off">
+    </div>
+    <div class="login-field">
+      <label>รหัสผ่าน</label>
+      <div style="position:relative">
+        <input type="password" id="login-pass" placeholder="password" onkeydown="if(event.key==='Enter')doLogin()" style="padding-right:44px">
+        <button type="button" onclick="togglePass()" id="eye-btn"
+          style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text3);font-size:1.1rem;padding:0;line-height:1">
+          👁️
+        </button>
+      </div>
+    </div>
+    <button id="login-btn" onclick="doLogin()">เข้าสู่ระบบ</button>
+    <div id="login-err"></div>
+  </div>
+</div>
+<div id="login-user-badge" style="display:none" onclick="doLogout()">
+  <span id="badge-role-icon">👤</span>
+  <span id="badge-username">—</span>
+  <span style="opacity:.5;font-size:.7rem">ออกจากระบบ</span>
+</div>
+
+</body>
+</html>
