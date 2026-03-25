@@ -765,6 +765,16 @@ body::before {
       </div>
 
       <!-- Status + calc btn -->
+      <!-- DATE RANGE FILTER สำหรับคำนวณรางวัล -->
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 16px;margin-bottom:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <span style="font-size:.75rem;color:var(--text3);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px">📅 ช่วงเวลาการขาย</span>
+        <input type="date" id="rw-from-date" class="date-input" placeholder="ตั้งแต่วันที่" style="font-size:.8rem">
+        <span style="color:var(--text3)">—</span>
+        <input type="date" id="rw-to-date" class="date-input" placeholder="ถึงวันที่" style="font-size:.8rem">
+        <button onclick="document.getElementById('rw-from-date').value='';document.getElementById('rw-to-date').value='';" style="background:none;border:1px solid var(--border);color:var(--text3);border-radius:6px;padding:5px 12px;font-size:.75rem;cursor:pointer;font-family:'Sarabun',sans-serif">ล้าง</button>
+        <span id="rw-date-info" style="font-size:.72rem;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-left:auto"></span>
+      </div>
+
       <div id="rw-fill-status" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 16px;margin-bottom:16px;font-size:.8rem;color:var(--text3);display:flex;align-items:center;gap:10px;flex-wrap:wrap">
         <span>สถานะ:</span>
         <span id="rw-status-D">⬜ D</span>
@@ -792,11 +802,11 @@ body::before {
         </div>
         <div style="padding:18px 20px">
 
-          <!-- 1 หลัก -->
-          <div style="font-size:.7rem;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">แบบ 1 หลัก</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
-            <div><div class="rw-lbl">R2ล่าง มูลค่ารางวัล (×)</div><input class="rw-input" type="text" inputmode="numeric" id="rv-R2L" placeholder="เช่น 4" style="text-align:center;color:#06b6d4;font-weight:700" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div>
-            <div><div class="rw-lbl">R3บน มูลค่ารางวัล (×)</div><input class="rw-input" type="text" inputmode="numeric" id="rv-R3B" placeholder="เช่น 4" style="text-align:center;color:#8b5cf6;font-weight:700" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div>
+          <!-- 1 หลัก — อัตโนมัติ คงที่ ไม่ต้องกรอก -->
+          <div style="background:rgba(6,182,212,.07);border:1px solid rgba(6,182,212,.2);border-radius:8px;padding:10px 14px;font-size:.75rem;color:var(--text3);line-height:2;margin-bottom:16px">
+            <b style="color:var(--cyan)">⚡ แบบ 1 หลัก (อัตโนมัติ — ไม่ต้องกำหนด)</b><br>
+            • <b style="color:#06b6d4">R2ล่าง</b> → ตรงเลขใดใน U → รางวัล <b style="color:var(--gold)">จำนวนซื้อ × 4</b><br>
+            • <b style="color:#8b5cf6">R3บน</b> → ตรงเลขใดใน D → รางวัล <b style="color:var(--gold)">จำนวนซื้อ × 3</b>
           </div>
 
           <div style="height:1px;background:var(--border);margin-bottom:14px"></div>
@@ -1478,11 +1488,19 @@ const RW_BG     = { O:'rgba(59,130,246,.15)', U:'rgba(245,158,11,.15)', D:'rgba(
 function initRewardPage() { rwCheckFields(); }
 
 // ── Reward config (มูลค่ารางวัล) ──────────────────────────
-let rwConfig = { R2L:0, R3B:0, O:0, U:0, D:0, R:0, '3DU':0, '3DF':0 };
+// โหลด rwConfig จาก localStorage (จดจำข้ามครั้ง)
+function rwLoadConfig() {
+  const saved = localStorage.getItem('mn_rwConfig');
+  if (saved) {
+    try { return JSON.parse(saved); } catch(e) {}
+  }
+  return { O:0, U:0, D:0, R:0, '3DU':0, '3DF':0 };
+}
+let rwConfig = rwLoadConfig();
 
 function rwOpenRewardConfig(){
   // โหลดค่าที่บันทึกไว้เข้า popup
-  ['R2L','R3B','O','U','D','R','3DU','3DF'].forEach(k=>{
+  ['O','U','D','R','3DU','3DF'].forEach(k=>{
     const el = document.getElementById('rv-'+k);
     if(el && rwConfig[k]) el.value = rwConfig[k];
   });
@@ -1495,11 +1513,12 @@ function rwCloseRewardConfig(){
 }
 
 function rwSaveConfig(){
-  ['R2L','R3B','O','U','D','R','3DU','3DF'].forEach(k=>{
+  ['O','U','D','R','3DU','3DF'].forEach(k=>{
     rwConfig[k] = parseFloat((document.getElementById('rv-'+k)||{}).value)||0;
   });
+  localStorage.setItem('mn_rwConfig', JSON.stringify(rwConfig));
   rwCloseRewardConfig();
-  alert('✅ บันทึกมูลค่ารางวัลแล้ว');
+  alert('✅ บันทึกมูลค่ารางวัลแล้ว — ระบบจดจำไว้แล้ว');
 }
 
 // R match — permutation เท่านั้น (ไม่รวมตรงเป๊ะ)
@@ -1540,6 +1559,26 @@ function rwCalc() {
   allSales = loadSales();
   const gv = id => (document.getElementById(id)||{}).value||'';
 
+  // ── กรองช่วงเวลา ──
+  const fromVal = gv('rw-from-date');
+  const toVal   = gv('rw-to-date');
+  let filteredSales = allSales;
+  if (fromVal || toVal) {
+    const fromD = fromVal ? new Date(fromVal) : null;
+    const toD   = toVal   ? new Date(toVal)   : null;
+    if (toD) toD.setHours(23,59,59,999);
+    filteredSales = allSales.filter(s => {
+      const d = new Date(s.dateObj);
+      if (fromD && d < fromD) return false;
+      if (toD   && d > toD)   return false;
+      return true;
+    });
+  }
+  if (filteredSales.length === 0) {
+    alert('⚠️ ไม่มีข้อมูลการขายในช่วงเวลาที่เลือก');
+    return;
+  }
+
   // เลขโดนใจ
   const dCode   = gv('ri-D-code').trim().padStart(3,'0');
   const uCode   = gv('ri-U-code').trim().padStart(2,'0');
@@ -1549,8 +1588,6 @@ function rwCalc() {
   const tdu2    = gv('ri-3DU-code2').trim().padStart(3,'0');
 
   // มูลค่ารางวัล (จาก popup config)
-  const vR2L  = rwConfig['R2L']  || 0;
-  const vR3B  = rwConfig['R3B']  || 0;
   const vO    = rwConfig['O']    || 0;
   const vU    = rwConfig['U']    || 0;
   const vD    = rwConfig['D']    || 0;
@@ -1566,10 +1603,11 @@ function rwCalc() {
 
   // เก็บผลรางวัลลูกค้า
   const custMap = {};
-  const addReward = (customer, billNo, label, variant, code, saleAmt, rewardVal) => {
-    if(!rewardVal) return;
+  // addReward: ถ้าส่ง rewardFixed จะใช้ค่านั้นตรงๆ (สำหรับ 1 หลัก qty-based)
+  const addReward = (customer, billNo, label, variant, code, saleAmt, rewardVal, rewardFixed) => {
+    if(!rewardVal && !rewardFixed) return;
     if(!custMap[customer]) custMap[customer]={sales:0,reward:0,details:[],bills:new Set()};
-    const reward = saleAmt * rewardVal;
+    const reward = rewardFixed !== undefined ? rewardFixed : saleAmt * rewardVal;
     custMap[customer].reward += reward;
     custMap[customer].bills.add(billNo);
     custMap[customer].details.push({label,variant,code,saleAmt,rewardVal,reward});
@@ -1577,7 +1615,7 @@ function rwCalc() {
 
   let grandSales=0, grandReward=0;
 
-  allSales.forEach(sale => {
+  filteredSales.forEach(sale => {
     sale.items.forEach(item => {
       const code3 = item.code.padStart(3,'0');
       const code2 = item.code.padStart(2,'0');
@@ -1587,16 +1625,24 @@ function rwCalc() {
       const cust  = sale.customer;
       const bill  = sale.billNo;
 
-      // ── 3.1 R2ล่าง → ตรงเลขใดใน U 2 หลัก ──
-      if(v==='R2ล่าง' && vR2L){
-        const dig = code1; // 1 หลัก
-        if(uCode.includes(dig)){ addReward(cust,bill,'R2ล่าง',v,code1,amt,vR2L); grandSales+=amt; grandReward+=amt*vR2L; }
+      // ── แบบ 1 หลัก: R2ล่าง → ตรงเลขใดใน U (qty×4) ──
+      if(v==='R2ล่าง'){
+        const dig = item.code.toString().trim();
+        if(uCode.includes(dig)){
+          const reward = item.qty * 4;
+          addReward(cust,bill,'R2ล่าง (1หลัก×4)',v,dig,item.qty,1,reward);
+          grandSales+=amt; grandReward+=reward;
+        }
       }
 
-      // ── 3.1 R3บน → ตรงเลขใดใน D 3 หลัก ──
-      if(v==='R3บน' && vR3B){
-        const dig = code1;
-        if(dCode.includes(dig)){ addReward(cust,bill,'R3บน',v,code1,amt,vR3B); grandSales+=amt; grandReward+=amt*vR3B; }
+      // ── แบบ 1 หลัก: R3บน → ตรงเลขใดใน D (qty×3) ──
+      if(v==='R3บน'){
+        const dig = item.code.toString().trim();
+        if(dCode.includes(dig)){
+          const reward = item.qty * 3;
+          addReward(cust,bill,'R3บน (1หลัก×3)',v,dig,item.qty,1,reward);
+          grandSales+=amt; grandReward+=reward;
+        }
       }
 
       // ── 3.2 O (2 ตัวบน) → ตรงเลขท้าย 2 ตัวของ D ──
@@ -1653,7 +1699,7 @@ function rwCalc() {
     custMap[cust].totalReward = custMap[cust].reward + b;
   });
 
-  const totalAllSales = allSales.reduce((s,sale)=>s+sale.total,0);
+  const totalAllSales = filteredSales.reduce((s,sale)=>s+sale.total,0);
 
   const now = new Date();
   const session = { id:Date.now(),
@@ -1661,6 +1707,7 @@ function rwCalc() {
     timestamp: now.toLocaleString('th-TH'),
     configs:[], custMap, grandSales, grandReward, totalAllSales,
     dCode, uCode, tdu1, tdu2, tdf1, tdf2, rwConfig:{...rwConfig},
+    fromDate: gv('rw-from-date'), toDate: gv('rw-to-date'), billCount: filteredSales.length,
     custBonus:{...custBonus} };
   rwSessions.unshift(session);
   rwActiveTab = session.id;
@@ -1693,7 +1740,14 @@ function renderRwResult(session) {
   const diffFmt       = (grandDiff>=0?'+':'−')+'฿'+Math.abs(grandDiff).toLocaleString('th-TH',{minimumFractionDigits:2});
   const diffColor     = grandDiff>=0?'var(--green)':'var(--red)';
 
+  const dateRangeLabel = (session.fromDate||session.toDate)
+    ? `${session.fromDate||'ต้น'}  →  ${session.toDate||'ปลาย'}`
+    : 'ทุกช่วงเวลา';
   document.getElementById('rw-result-content').innerHTML = `
+    <div style="background:rgba(59,130,246,.07);border:1px solid rgba(59,130,246,.2);border-radius:8px;padding:8px 14px;margin-bottom:12px;font-size:.75rem;color:var(--text3);display:flex;gap:16px;flex-wrap:wrap;align-items:center">
+      <span>📅 ช่วงเวลา: <b style="color:var(--blue)">${dateRangeLabel}</b></span>
+      <span>🧾 บิลที่คำนวณ: <b style="color:var(--blue)">${session.billCount||0} บิล</b></span>
+    </div>
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px">
       <div class="kpi-card purple"><div class="kpi-label">เลขโดนใจ D</div><div class="kpi-val" style="font-family:'JetBrains Mono',monospace">${dCode||'—'}</div></div>
       <div class="kpi-card gold"><div class="kpi-label">เลขโดนใจ U</div><div class="kpi-val" style="font-family:'JetBrains Mono',monospace">${uCode||'—'}</div></div>
