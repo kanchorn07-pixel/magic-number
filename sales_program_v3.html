@@ -5,6 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ระบบขายสินค้า</title>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#c0392b">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MagicNumber">
+<link rel="apple-touch-icon" href="icon-192.png">
 <style>
 :root {
   --bg:#f5f0e8; --surface:#faf7f2; --surface2:#ede8df; --border:#d4cdc0;
@@ -1076,13 +1083,13 @@ const FB_AUTH = 'https://magic-number-7b488-default-rtdb.asia-southeast1.firebas
 const ALLOWED_ROLES_SALES = ['admin','seller']; // ผู้ขายและ admin เท่านั้น
 
 async function checkLogin(){
-  const sess = sessionStorage.getItem('mn_session');
+  const sess = localStorage.getItem('mn_session');
   if(sess){
     try{
       const u = JSON.parse(sess);
       if(ALLOWED_ROLES_SALES.includes(u.role)){ applySession(u); return; }
     }catch(e){}
-    sessionStorage.removeItem('mn_session');
+    localStorage.removeItem('mn_session');
   }
   document.getElementById('login-overlay').style.display='flex';
 }
@@ -1109,7 +1116,7 @@ async function doLogin(){
     if(!ALLOWED_ROLES_SALES.includes(data.role)){
       if(data.role==='manager'||data.role==='admin'){
         const session = {username, role:data.role, name:data.name||username};
-        sessionStorage.setItem('mn_session', JSON.stringify(session));
+        localStorage.setItem('mn_session', JSON.stringify(session));
         errEl.textContent='กำลังพาไปหน้า Dashboard...';
         setTimeout(()=>{ window.location.href='dashboard.html'; }, 800);
       } else {
@@ -1118,7 +1125,7 @@ async function doLogin(){
       btn.disabled=false; return;
     }
     const session = {username, role:data.role, name:data.name||username};
-    sessionStorage.setItem('mn_session', JSON.stringify(session));
+    localStorage.setItem('mn_session', JSON.stringify(session));
     applySession(session);
   }catch(e){
     errEl.textContent='ไม่สามารถเชื่อมต่อได้ กรุณาลองใหม่';
@@ -1136,7 +1143,7 @@ function applySession(u){
 
 function doLogout(){
   if(!confirm('ยืนยันออกจากระบบ?')) return;
-  sessionStorage.removeItem('mn_session');
+  localStorage.removeItem('mn_session');
   location.reload();
 }
 
@@ -1175,5 +1182,15 @@ checkLogin();
   <span style="opacity:.5;font-size:.7rem">ออกจากระบบ</span>
 </div>
 
+<script>
+// PWA — Register Service Worker
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js')
+      .then(() => console.log('✅ SW registered'))
+      .catch(e => console.log('SW error:', e));
+  });
+}
+</script>
 </body>
 </html>
