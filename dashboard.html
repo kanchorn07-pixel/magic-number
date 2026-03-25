@@ -1625,22 +1625,22 @@ function rwCalc() {
       const cust  = sale.customer;
       const bill  = sale.billNo;
 
-      // ── แบบ 1 หลัก: R2ล่าง → ตรงเลขใดใน U (qty×4) ──
+      // ── แบบ 1 หลัก: R2ล่าง → ตรงเลขใดใน U (ราคา×4) ──
       if(v==='R2ล่าง'){
         const dig = item.code.toString().trim();
         if(uCode.includes(dig)){
-          const reward = item.qty * 4;
-          addReward(cust,bill,'R2ล่าง (1หลัก×4)',v,dig,item.qty,1,reward);
+          const reward = item.price * 4;
+          addReward(cust,bill,'R2ล่าง (price×4)',v,dig,item.price,1,reward);
           grandSales+=amt; grandReward+=reward;
         }
       }
 
-      // ── แบบ 1 หลัก: R3บน → ตรงเลขใดใน D (qty×3) ──
+      // ── แบบ 1 หลัก: R3บน → ตรงเลขใดใน D (ราคา×3) ──
       if(v==='R3บน'){
         const dig = item.code.toString().trim();
         if(dCode.includes(dig)){
-          const reward = item.qty * 3;
-          addReward(cust,bill,'R3บน (1หลัก×3)',v,dig,item.qty,1,reward);
+          const reward = item.price * 3;
+          addReward(cust,bill,'R3บน (price×3)',v,dig,item.price,1,reward);
           grandSales+=amt; grandReward+=reward;
         }
       }
