@@ -873,13 +873,21 @@ document.addEventListener('DOMContentLoaded', function(){
 });
 
 // ============================================================
-// FIREBASE CONFIG — ใส่ค่าเดียวกับระบบขาย
+// FIREBASE CONFIG
 // ============================================================
 const FB_URL = 'https://magic-number-7b488-default-rtdb.asia-southeast1.firebasedatabase.app';
 
+// fbFetch ถูกกำหนดใน LOGIN SYSTEM section ด้านล่าง
+// แต่ต้องใช้ที่นี่ก่อน → สร้าง wrapper ชั่วคราว
+function _fbFetchData(path) {
+  const token = _firebaseToken;
+  const url = FB_URL + path + (token ? '?auth='+token : '');
+  return fetch(url);
+}
+
 async function fetchFromFirebase() {
   try {
-    const res  = await fetch(FB_URL + '/sales_data.json');
+    const res  = await _fbFetchData('/sales_data.json');
     const data = await res.json();
     let arr = [];
     if (Array.isArray(data)) {
@@ -1878,20 +1886,37 @@ async function refreshData() {
 
 // initDashboard called after login
 setInterval(refreshData, 30000);
-// ── LOGIN SYSTEM ──────────────────────────────────────────
-const FB_AUTH = 'https://magic-number-7b488-default-rtdb.asia-southeast1.firebasedatabase.app';
-const ALLOWED_ROLES_DASH = ['admin','manager']; // ผู้บริหารและ admin เท่านั้น
+// ── LOGIN SYSTEM (Firebase Authentication) ──────────────────
+const FIREBASE_API_KEY = 'AIzaSyCeKMbZmrhLHosm2WLNCqQAiFKAtJ0nNzc'; // ← ใส่ apiKey จาก Firebase Console
+const FB_RTDB = 'https://magic-number-7b488-default-rtdb.asia-southeast1.firebasedatabase.app';
+const ALLOWED_ROLES_DASH = ['admin','manager'];
+
+// Firebase Auth REST API base
+const FB_AUTH_URL = `https://identitytoolkit.googleapis.com/v1/accounts`;
+
+let _firebaseToken = null; // เก็บ ID Token ปัจจุบัน
+
+// แนบ token ไปกับ fetch Firebase RTDB
+async function fbFetch(path, options={}) {
+  const token = _firebaseToken;
+  const sep = path.includes('?') ? '&' : '?';
+  const url = FB_RTDB + path + (token ? sep+'auth='+token : '');
+  return fetch(url, options);
+}
 
 async function checkLogin(){
   const sess = sessionStorage.getItem('mn_session');
   if(sess){
     try{
       const u = JSON.parse(sess);
-      if(ALLOWED_ROLES_DASH.includes(u.role)){ applySession(u); return; }
+      if(ALLOWED_ROLES_DASH.includes(u.role) && u.token){
+        _firebaseToken = u.token;
+        applySession(u);
+        return;
+      }
     }catch(e){}
     sessionStorage.removeItem('mn_session');
   }
-  // แสดง Login modal
   const ov = document.getElementById('login-overlay');
   ov.style.display='flex';
 }
@@ -1911,14 +1936,33 @@ async function doLogin(){
   if(!username||!password){ errEl.textContent='กรุณากรอกชื่อผู้ใช้และรหัสผ่าน'; return; }
   btn.disabled=true; errEl.textContent='กำลังตรวจสอบ...';
   try{
-    const res = await fetch(FB_AUTH+'/users/'+username+'.json');
-    const data = await res.json();
-    if(!data){ errEl.textContent='ไม่พบผู้ใช้งานนี้'; btn.disabled=false; return; }
-    if(data.password !== password){ errEl.textContent='รหัสผ่านไม่ถูกต้อง'; btn.disabled=false; return; }
-    if(!ALLOWED_ROLES_DASH.includes(data.role)){
-      if(data.role==='seller'){
-        // ผู้ขาย → redirect ไปหน้าระบบขาย
-        const session = {username, role:data.role, name:data.name||username};
+    // Step 1: Firebase Authentication (Email/Password)
+    const email = username + '@magic.local';
+    const authRes = await fetch(`${FB_AUTH_URL}:signInWithPassword?key=${FIREBASE_API_KEY}`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({email, password, returnSecureToken:true})
+    });
+    const authData = await authRes.json();
+    if(!authRes.ok || !authData.idToken){
+      const code = authData.error?.message || '';
+      if(code==='EMAIL_NOT_FOUND'||code==='INVALID_EMAIL') errEl.textContent='ไม่พบผู้ใช้งานนี้';
+      else if(code==='INVALID_PASSWORD'||code==='INVALID_LOGIN_CREDENTIALS') errEl.textContent='รหัสผ่านไม่ถูกต้อง';
+      else if(code==='USER_DISABLED') errEl.textContent='บัญชีนี้ถูกระงับการใช้งาน';
+      else errEl.textContent='เข้าสู่ระบบไม่สำเร็จ';
+      btn.disabled=false; return;
+    }
+    _firebaseToken = authData.idToken;
+
+    // Step 2: โหลด role จาก RTDB (ตอนนี้มี token แล้ว)
+    const userRes = await fbFetch('/users/'+username+'.json');
+    const userData = await userRes.json();
+    if(!userData){ errEl.textContent='ไม่พบข้อมูลผู้ใช้ใน Database'; btn.disabled=false; return; }
+
+    const role = userData.role || 'seller';
+    if(!ALLOWED_ROLES_DASH.includes(role)){
+      if(role==='seller'){
+        const session = {username, role, name:userData.name||username, token:_firebaseToken};
         sessionStorage.setItem('mn_session', JSON.stringify(session));
         errEl.textContent='กำลังพาไปหน้าระบบขาย...';
         setTimeout(()=>{ window.location.href='sales_program_v3.html'; }, 800);
@@ -1927,7 +1971,7 @@ async function doLogin(){
       }
       btn.disabled=false; return;
     }
-    const session = {username, role:data.role, name:data.name||username};
+    const session = {username, role, name:userData.name||username, token:_firebaseToken};
     sessionStorage.setItem('mn_session', JSON.stringify(session));
     applySession(session);
   }catch(e){
@@ -1938,22 +1982,29 @@ async function doLogin(){
 
 function applySession(u){
   document.getElementById('login-overlay').style.display='none';
-  // แสดงชื่อ user ใน sidebar บนซ้าย
   const roleLabel = u.role==='admin'?'ผู้ดูแลระบบ':u.role==='manager'?'ผู้บริหาร':'ผู้ขาย';
   const roleIcon  = u.role==='admin'?'👑':u.role==='manager'?'📊':'🛒';
   document.getElementById('sidebar-user').style.display='';
   document.getElementById('sidebar-username').textContent = u.name||u.username;
   document.getElementById('sidebar-role-icon').textContent = roleIcon;
   document.getElementById('sidebar-role-text').textContent = roleLabel;
-  // แสดงปุ่ม logout ใน sidebar ล่าง
   document.getElementById('sidebar-logout').style.display='';
-  // ซ่อน floating badge เดิม
   document.getElementById('login-user-badge').style.display='none';
   initDashboard();
 }
 
-function doLogout(){
+async function doLogout(){
   if(!confirm('ยืนยันออกจากระบบ?')) return;
+  // Sign out จาก Firebase Auth
+  if(_firebaseToken){
+    try{
+      await fetch(`${FB_AUTH_URL}:signOut?key=${FIREBASE_API_KEY}`,{
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({idToken:_firebaseToken})
+      });
+    }catch(e){}
+    _firebaseToken = null;
+  }
   sessionStorage.removeItem('mn_session');
   location.reload();
 }
