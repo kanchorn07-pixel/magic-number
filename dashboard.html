@@ -891,11 +891,13 @@ async function getFbToken() {
       { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({returnSecureToken:true}) }
     );
     const d = await r.json();
+    console.log('[getFbToken] status:', r.status, 'response:', JSON.stringify(d));
     if (d.idToken) {
       _fbToken = d.idToken;
       _fbTokenExp = now + (parseInt(d.expiresIn||3600) * 1000);
       return _fbToken;
     }
+    console.error('[getFbToken] ไม่ได้ idToken:', d.error || d);
   } catch(e) { console.error('getFbToken error:', e); }
   return null;
 }
