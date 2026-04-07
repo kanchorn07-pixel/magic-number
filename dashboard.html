@@ -1940,9 +1940,14 @@ async function doLogin(){
   if(!username||!password){ errEl.textContent='กรุณากรอกชื่อผู้ใช้และรหัสผ่าน'; return; }
   btn.disabled=true; errEl.textContent='กำลังตรวจสอบ...';
   try{
+    // ดึง token ก่อน — ถ้าไม่ได้ให้แจ้ง error ชัดเจน
+    const token = await getFbToken();
+    if(!token){ errEl.textContent='ไม่สามารถเชื่อมต่อ Firebase ได้ กรุณารีเฟรชหน้า'; btn.disabled=false; return; }
+
     const res = await fbFetch('/users/'+username+'.json');
+    if(!res.ok){ errEl.textContent='ไม่สามารถเชื่อมต่อได้ ('+res.status+')'; btn.disabled=false; return; }
     const data = await res.json();
-    if(!data){ errEl.textContent='ไม่พบผู้ใช้งานนี้'; btn.disabled=false; return; }
+    if(!data || typeof data !== 'object' || !data.password){ errEl.textContent='ไม่พบผู้ใช้งานนี้'; btn.disabled=false; return; }
     if(data.password !== password){ errEl.textContent='รหัสผ่านไม่ถูกต้อง'; btn.disabled=false; return; }
     if(!ALLOWED_ROLES_DASH.includes(data.role)){
       if(data.role==='seller'){
